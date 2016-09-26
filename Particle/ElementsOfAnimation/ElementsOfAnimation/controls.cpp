@@ -3,8 +3,8 @@
 extern GLFWwindow* window; // The "extern" keyword here is to access the variable "window" declared in tutorialXXX.cpp. This is a hack to keep the tutorials simple. Please avoid this.
 
 // Include GLM
-#include "C:\Users\Albin\Desktop\Particle\deps\include\glm-0.9.7.1\glm\glm.hpp"
-#include "C:\Users\Albin\Desktop\Particle\deps\include\glm-0.9.7.1\glm\gtc\matrix_transform.hpp"
+#include "C:\Users\Albin\Documents\GitHub\Elements-of-Animation\Particle\deps\include\glm-0.9.7.1\glm\glm.hpp"
+#include "C:\Users\Albin\Documents\GitHub\Elements-of-Animation\Particle\deps\include\glm-0.9.7.1\glm\gtc\matrix_transform.hpp"
 using namespace glm;
 
 #include "controls.hpp"

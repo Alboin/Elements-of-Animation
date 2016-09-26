@@ -74,10 +74,10 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>C:\Users\Albin\Desktop\Particle\deps\glfw-3.2.1.bin.WIN32\include;C:\Users\Albin\Desktop\Particle\deps\glew-1.9.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\Albin\Documents\GitHub\Elements-of-Animation\Particle\deps\glfw-3.2.1.bin.WIN32\include;C:\Users\Albin\Documents\GitHub\Elements-of-Animation\Particle\deps\glew-1.9.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>C:\Users\Albin\Desktop\Particle\deps\glew-1.9.0\lib;C:\Users\Albin\Desktop\Particle\deps\glfw-3.2.1.bin.WIN32\lib-vc2015;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\Users\Albin\Documents\GitHub\Elements-of-Animation\Particle\deps\glew-1.9.0\lib;C:\Users\Albin\Documents\GitHub\Elements-of-Animation\Particle\deps\glfw-3.2.1.bin.WIN32\lib-vc2015;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>opengl32.lib;glu32.lib;glew32.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
@@ -95,12 +95,12 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>C:\Users\Albin\Desktop\Particle\deps\glfw-3.2.1.bin.WIN32\include;C:\Users\Albin\Desktop\Particle\deps\glew-1.9.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\Albin\Documents\GitHub\Elements-of-Animation\Particle\deps\glfw-3.2.1.bin.WIN32\include;C:\Users\Albin\Documents\GitHub\Elements-of-Animation\Particle\deps\glew-1.9.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>C:\Users\Albin\Desktop\Particle\deps\glew-1.9.0\lib;C:\Users\Albin\Desktop\Particle\deps\glfw-3.2.1.bin.WIN32\lib-vc2015;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\Users\Albin\Documents\GitHub\Elements-of-Animation\Particle\deps\glew-1.9.0\lib;C:\Users\Albin\Documents\GitHub\Elements-of-Animation\Particle\deps\glfw-3.2.1.bin.WIN32\lib-vc2015;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>opengl32.lib;glu32.lib;glew32.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
@@ -120,16 +120,13 @@
   <ItemGroup>
     <ClCompile Include="controls.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="OrthogonalPlane.cpp" />
     <ClCompile Include="shader.cpp" />
     <ClCompile Include="Box.cpp" />
     <ClCompile Include="SolidSphere.cpp" />
-    <ClCompile Include="Sphere.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Box.hpp" />
     <ClInclude Include="controls.hpp" />
-    <ClInclude Include="OrthogonalPlane.hpp" />
     <ClInclude Include="shader.hpp" />
     <ClInclude Include="Sphere.hpp" />
   </ItemGroup>

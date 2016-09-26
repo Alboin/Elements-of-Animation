@@ -4,7 +4,6 @@
 #include <GL/glew.h>
 #include <new>
 #include <vector>
-#include "OrthogonalPlane.hpp"
 
 class Box {
 public:

@@ -9,7 +9,7 @@ using namespace std;
 #include <stdlib.h>
 #include <string.h>
 
-#include "C:\Users\Albin\Desktop\Particle\deps\include\glew-1.13.0\include\GL\glew.h"
+#include "C:\Users\Albin\Documents\GitHub\Elements-of-Animation\Particle\deps\include\glew-1.13.0\include\GL\glew.h"
 
 #include "shader.hpp"
 

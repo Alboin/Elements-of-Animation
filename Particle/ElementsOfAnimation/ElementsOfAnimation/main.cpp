@@ -11,15 +11,14 @@
 #include <GLFW/glfw3.h>
 GLFWwindow* window;
 
-#include "C:\Users\Albin\Desktop\Particle\deps\include\glm-0.9.7.1\glm\glm.hpp"
-#include "C:\Users\Albin\Desktop\Particle\deps\include\glm-0.9.7.1\glm\gtx\transform.hpp" 
-#include "C:\Users\Albin\Desktop\Particle\deps\include\glm-0.9.7.1\glm\gtc\matrix_transform.hpp"
+#include "C:\Users\Albin\Documents\GitHub\Elements-of-Animation\Particle\deps\include\glm-0.9.7.1\glm\glm.hpp"
+#include "C:\Users\Albin\Documents\GitHub\Elements-of-Animation\Particle\deps\include\glm-0.9.7.1\glm\gtx\transform.hpp" 
+#include "C:\Users\Albin\Documents\GitHub\Elements-of-Animation\Particle\deps\include\glm-0.9.7.1\glm\gtc\matrix_transform.hpp"
 
 using namespace glm;
 
 #include "shader.hpp"
 #include "controls.hpp"
-#include "OrthogonalPlane.hpp"
 #include "Box.hpp"
 #include "SolidSphere.cpp"
 
