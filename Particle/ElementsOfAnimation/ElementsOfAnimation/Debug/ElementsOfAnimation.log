@@ -1,0 +1,14 @@
+﻿  main.cpp
+c:\users\albin\desktop\particle\elementsofanimation\elementsofanimation\solidsphere.cpp(27): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+c:\users\albin\desktop\particle\elementsofanimation\elementsofanimation\solidsphere.cpp(27): warning C4244: 'initializing': conversion from 'double' to 'const float', possible loss of data
+c:\users\albin\desktop\particle\elementsofanimation\elementsofanimation\solidsphere.cpp(28): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+c:\users\albin\desktop\particle\elementsofanimation\elementsofanimation\solidsphere.cpp(28): warning C4244: 'initializing': conversion from 'double' to 'const float', possible loss of data
+c:\users\albin\desktop\particle\elementsofanimation\elementsofanimation\solidsphere.cpp(31): warning C4305: 'initializing': truncation from 'double' to 'float'
+c:\users\albin\desktop\particle\elementsofanimation\elementsofanimation\solidsphere.cpp(39): warning C4018: '<': signed/unsigned mismatch
+c:\users\albin\desktop\particle\elementsofanimation\elementsofanimation\solidsphere.cpp(53): warning C4018: '<': signed/unsigned mismatch
+c:\users\albin\desktop\particle\elementsofanimation\elementsofanimation\main.cpp(146): warning C4018: '<': signed/unsigned mismatch
+c:\users\albin\desktop\particle\elementsofanimation\elementsofanimation\main.cpp(147): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+  Box.cpp
+  Generating Code...
+  ElementsOfAnimation.vcxproj -> C:\Users\Albin\Desktop\Particle\ElementsOfAnimation\Debug\ElementsOfAnimation.exe
+  ElementsOfAnimation.vcxproj -> C:\Users\Albin\Desktop\Particle\ElementsOfAnimation\Debug\ElementsOfAnimation.pdb (Partial PDB)
