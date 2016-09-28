@@ -9,5 +9,5 @@ out vec3 color;
 uniform float TIME;
 
 void main(){
-  color =  fragmentColor * (sin(TIME)*0.5 + 0.7);
+  color =  fragmentColor; //mod(fragmentColor + TIME/1, 1);
 }

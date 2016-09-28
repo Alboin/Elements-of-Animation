@@ -119,7 +119,9 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="controls.cpp" />
+    <ClCompile Include="Geometry.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Particle.cpp" />
     <ClCompile Include="shader.cpp" />
     <ClCompile Include="Box.cpp" />
     <ClCompile Include="SolidSphere.cpp" />
@@ -127,8 +129,9 @@
   <ItemGroup>
     <ClInclude Include="Box.hpp" />
     <ClInclude Include="controls.hpp" />
+    <ClInclude Include="Geometry.h" />
+    <ClInclude Include="Particle.h" />
     <ClInclude Include="shader.hpp" />
-    <ClInclude Include="Sphere.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="SimpleFragmentShader.glsl" />

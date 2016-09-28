@@ -20,9 +20,11 @@ protected:
 	std::vector<glm::vec3> normals;
 	std::vector<glm::vec2> texcoords;
 	std::vector<GLushort> indices;
+	float r;
 
 public:
 	SolidSphere(float radius, unsigned int rings, unsigned int sectors)
+		:r(radius)
 	{
 		float const R = 1. / (float)(rings - 1);
 		float const S = 1. / (float)(sectors - 1);
@@ -93,5 +95,9 @@ public:
 	std::vector<GLushort> getIndices()
 	{
 		return indices;
+	}
+	float getRadius()
+	{
+		return r;
 	}
 };

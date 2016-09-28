@@ -21,12 +21,49 @@ using namespace glm;
 #include "controls.hpp"
 #include "Box.hpp"
 #include "SolidSphere.cpp"
+#include "Particle.h"
+#include "Geometry.h"
 
 int main(void)
 {
 	int fps = 60;
+	float dt = 1 / (float)fps; //simulation time-step
 	int start_time = GetTickCount();
-	float passed_time = 0;
+	float passed_time = 0.0;
+
+	//Create Sphere
+	SolidSphere sphere(1, 12, 24);
+
+	//Create box
+	Box boxen(5, 4, 10);
+
+	//-------------- Create particles -----------------------
+
+	Particle p(0.0f, 2.0f, 0.0f); //initial position of the particle
+	p.setLifetime(50.0f);
+	p.setBouncing(0.95f);
+	p.addForce(0, -9.8f, 0);
+	p.setVelocity(0.1, 0, 0.1);
+
+	// Define a box made out of planes, for collision
+
+	glm::vec3 punt(0.0f);
+	glm::vec3 normal(0, 1, 0);
+	Plane plane(punt, normal);
+
+	Plane box_restrictions[5] = {
+		Plane(glm::vec3(0, -boxen.getMeasurements()[1] / 2,0), glm::vec3(0,1,0)),
+		Plane(glm::vec3(boxen.getMeasurements()[0] / 2,0,0), glm::vec3(-1,0,0)),
+		Plane(glm::vec3(-boxen.getMeasurements()[0] / 2,0,0), glm::vec3(1,0,0)),
+		Plane(glm::vec3(0,0,boxen.getMeasurements()[2] / 2), glm::vec3(0,0,-1)),
+		Plane(glm::vec3(0,0,-boxen.getMeasurements()[2] / 2), glm::vec3(0,0,1))
+	};
+
+	float disact[5], disant[5];
+	for (int i = 0; i < 5; i++)
+		disact[i] = box_restrictions[i].distPoint2Plane(p.getCurrentPosition());
+
+	//-------------------------------------------------------
 
 	// Initialise GLFW
 	if (!glfwInit())
@@ -64,9 +101,6 @@ int main(void)
 	// Set background color
 	glClearColor(0.9f, 0.9f, 0.9f, 0.0f);
 
-	// Set point size, points used for particle rendering
-	glPointSize(10);
-
 	// Enable depth test
 	glEnable(GL_DEPTH_TEST);
 	// Accept fragment if it closer to the camera than the former one
@@ -87,9 +121,6 @@ int main(void)
 	GLuint TimeID = glGetUniformLocation(programID, "TIME");
 
 	//-------------- Sphere buffers start ------------------------
-
-	//Create Sphere
-	SolidSphere sphere(1, 12, 24);
 
 	// Load it into a VBO
 	GLuint vertexbuffer1;
@@ -117,9 +148,6 @@ int main(void)
 
 	//-------------- Box buffers start -------------------------
 
-	//Create box
-	Box boxen(3, 2, 6);
-
 	GLuint vertexbuffer2;
 	glGenBuffers(1, &vertexbuffer2);
 	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer2);
@@ -134,6 +162,63 @@ int main(void)
 
 	//-------------- Box buffers end ---------------------------
 
+	//-------------- Triangle buffers start --------------------
+
+	GLfloat triangle_vertices[9] =
+	{
+		 2.0, 2.0, 2.0,
+		 2.0,-2.0,-2.0,
+		 -2.0,-2.0, 2.0
+	};
+	GLushort triangle_indices[3] =
+	{
+		0,1,2
+	};
+
+	GLuint vertexbuffer3;
+	glGenBuffers(1, &vertexbuffer3);
+	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer3);
+	glBufferData(GL_ARRAY_BUFFER, 9 * sizeof(GLfloat), &triangle_vertices[0], GL_STATIC_DRAW);
+
+	// Generate a buffer for the indices as well
+	GLuint elementbuffer3;
+	glGenBuffers(1, &elementbuffer3);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementbuffer3);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, 3 * sizeof(GLushort), &triangle_indices[0], GL_STATIC_DRAW);
+
+
+	//-------------- Triangle buffers end ----------------------
+
+	//-------------- Particle buffers start --------------------
+
+	// Set point size, points used for particle rendering
+	glPointSize(50);
+
+	const int n_particles = 1;
+
+	GLfloat particle_vertices[n_particles * 3] =
+	{
+		p.getCurrentPosition()[0], p.getCurrentPosition()[1], p.getCurrentPosition()[2]
+	};
+	GLushort particle_indices[n_particles] =
+	{
+		0
+	};
+
+	GLuint vertexbuffer4;
+	glGenBuffers(1, &vertexbuffer4);
+	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer4);
+	glBufferData(GL_ARRAY_BUFFER, n_particles * 3 * sizeof(GLfloat), &particle_vertices[0], GL_STATIC_DRAW);
+
+	// Generate a buffer for the indices as well
+	GLuint elementbuffer4;
+	glGenBuffers(1, &elementbuffer4);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementbuffer4);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, n_particles * sizeof(GLushort), &particle_indices[0], GL_STATIC_DRAW);
+
+	//-------------- Particle buffers end ----------------------
+
+
 	//-------------- Create random colors ----------------------
 
 	GLuint colorbuffer1;
@@ -142,7 +227,7 @@ int main(void)
 
 	//Create a vector with random colors
 	std::vector<GLfloat> colors;
-	for(int i = 0; i < boxen.getVertices().size() + sphere.getVertices().size(); i++)
+	for(int i = 0; i < boxen.getVertices().size() + sphere.getVertices().size() + n_particles; i++)
 		colors.push_back((((double) rand() / (RAND_MAX))));
 
 	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * colors.size(), &colors.front(), GL_STATIC_DRAW);
@@ -167,8 +252,8 @@ int main(void)
 		glm::mat4 ViewMatrix = getViewMatrix();
 
 		//-------------- Start rendering first object ------------------------
-		
-		glm::mat4 ModelMatrix1 = glm::mat4(1.0);
+
+		glm::mat4 ModelMatrix1 = glm::mat4(3.0);
 		glm::mat4 MVP1 = ProjectionMatrix * ViewMatrix * ModelMatrix1;
 
 		// Send our transformation to the currently bound shader, 
@@ -202,12 +287,12 @@ int main(void)
 
 		// Index buffer
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementbuffer1);
-		
+
 		//GL_LINE_LOOP
 
 		// Draw the triangles !
 		glDrawElements(
-			GL_LINES,      // mode
+			GL_TRIANGLES,      // mode
 			sphere.getIndices().size(),    // count
 			GL_UNSIGNED_SHORT,   // type
 			(void*)0           // element array buffer offset
@@ -237,18 +322,6 @@ int main(void)
 			(void*)0            // array buffer offset
 		);
 
-		// 2nd attribute buffer : colors
-		glEnableVertexAttribArray(1);
-		glBindBuffer(GL_ARRAY_BUFFER, colorbuffer1);
-		glVertexAttribPointer(
-			1,                                // attribute. No particular reason for 1, but must match the layout in the shader.
-			3,                                // size
-			GL_FLOAT,                         // type
-			GL_FALSE,                         // normalized?
-			0,                                // stride
-			(void*)0                          // array buffer offset
-		);
-
 		// Index buffer
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementbuffer2);
 
@@ -259,14 +332,80 @@ int main(void)
 			GL_UNSIGNED_SHORT,   // type
 			(void*)0           // element array buffer offset
 		);
-		
+
 		//-------------- End of rendering second object ----------------------
 
+		//-------------- Start rendering third object ------------------------
 
-		/*
-		// Draw the triangle !
-		glDrawArrays(GL_TRIANGLES, 0, all_vertices.size()/3); // 12*3 indices starting at 0 -> 12 triangles
-		*/
+		glm::mat4 ModelMatrix3 = glm::mat4(1.0);
+		glm::mat4 MVP3 = ProjectionMatrix * ViewMatrix * ModelMatrix3;
+
+		// Send our transformation to the currently bound shader, 
+		// in the "MVP" uniform
+		glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP3[0][0]);
+		glUniformMatrix4fv(ModelMatrixID, 1, GL_FALSE, &ModelMatrix3[0][0]);
+
+		// 1rst attribute buffer : vertices
+		glEnableVertexAttribArray(0);
+		glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer3);
+		glVertexAttribPointer(
+			0,                  // attribute
+			3,                  // size
+			GL_FLOAT,           // type
+			GL_FALSE,           // normalized?
+			0,                  // stride
+			(void*)0            // array buffer offset
+		);
+
+		// Index buffer
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementbuffer3);
+
+		// Draw the triangles !
+		glDrawElements(
+			GL_TRIANGLES,      // mode
+			3,    // count
+			GL_UNSIGNED_SHORT,   // type
+			(void*)0           // element array buffer offset
+		);
+
+		//-------------- End of rendering third object -----------------------
+
+		//-------------- Start rendering particles ---------------------------
+
+		glm::mat4 ModelMatrix4 = glm::mat4(1.0);
+		glm::mat4 MVP4 = ProjectionMatrix * ViewMatrix * ModelMatrix4;
+
+		// Send our transformation to the currently bound shader, 
+		// in the "MVP" uniform
+		glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP4[0][0]);
+		glUniformMatrix4fv(ModelMatrixID, 1, GL_FALSE, &ModelMatrix4[0][0]);
+
+		// 1rst attribute buffer : vertices
+		glEnableVertexAttribArray(0);
+		glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer4);
+		glVertexAttribPointer(
+			0,                  // attribute
+			3,                  // size
+			GL_FLOAT,           // type
+			GL_FALSE,           // normalized?
+			0,                  // stride
+			(void*)0            // array buffer offset
+		);
+
+		// Index buffer
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementbuffer4);
+
+		// Draw the triangles !
+		glDrawElements(
+			GL_POINTS,      // mode
+			3,    // count
+			GL_UNSIGNED_SHORT,   // type
+			(void*)0           // element array buffer offset
+		);
+
+		//-------------- End of rendering particles --------------------------
+
+
 		glDisableVertexAttribArray(0);
 		glDisableVertexAttribArray(1);
 		glDisableVertexAttribArray(2);
@@ -275,22 +414,107 @@ int main(void)
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 
-		std::this_thread::sleep_for(std::chrono::milliseconds(1000/fps));
+		std::this_thread::sleep_for(std::chrono::milliseconds(1000*3 / fps));
 
 		//Pass time variable to uniform variable in fragmentshader
 		glUniform1f(TimeID, passed_time);
 		passed_time = (GetTickCount() - start_time) * 0.001f;
 
+		p.updateParticle(dt, Particle::UpdateMethod::EulerOrig);
+		p.setLifetime(p.getLifetime() - dt);
+
+		//Check for plane collisions
+		for (int i = 0; i < 5; i++)
+		{
+			disant[i] = disact[i];
+			disact[i] = box_restrictions[i].distPoint2Plane(p.getCurrentPosition());
+			if (disant[i] * disact[i] < 0.0f) {
+				glm::vec3 new_pos = p.getCurrentPosition() - (1.0f + p.getBouncing()) * (box_restrictions[i].normal * p.getCurrentPosition() + box_restrictions[i].dconst) * box_restrictions[i].normal;
+				p.setPosition(new_pos);
+				glm::vec3 new_vel = p.getVelocity() - (1.0f + p.getBouncing()) * (box_restrictions[i].normal * p.getVelocity()) * box_restrictions[i].normal;
+				p.setVelocity(new_vel);
+				disact[i] = -disact[i];
+			}
+		}
+
+		//Check for triangle collisions
+		glm::vec3 A = glm::vec3(triangle_vertices[0], triangle_vertices[1], triangle_vertices[2]);
+		glm::vec3 B = glm::vec3(triangle_vertices[3], triangle_vertices[4], triangle_vertices[5]);
+		glm::vec3 C = glm::vec3(triangle_vertices[6], triangle_vertices[7], triangle_vertices[8]);
+		glm::vec3 triangle_normal = glm::cross((B - A), (C - A));
+		triangle_normal = triangle_normal / length(triangle_normal);
+		glm::vec3 particle_projection = p.getCurrentPosition() - glm::dot(p.getCurrentPosition() - A, triangle_normal) * triangle_normal;
+
+		float A1 = (1.0f / 2.0f) * glm::length(glm::cross(B - particle_projection, C - particle_projection));
+		float A2 = (1.0f / 2.0f) * glm::length(glm::cross(particle_projection - A, C - A));
+		float A3 = (1.0f / 2.0f) * glm::length(glm::cross(B - A, particle_projection - A));
+		float A4 = (1.0f / 2.0f) * glm::length(glm::cross(B - A, C - A));
+
+		if (!(A1 + A2 + A3 > A4))
+		{
+			float d = -1.0f * dot(triangle_normal, glm::vec3(triangle_vertices[0], triangle_vertices[1], triangle_vertices[2]));
+			float dist_to_triangle = (dot(triangle_normal, p.getCurrentPosition()) + d) * (dot(triangle_normal, p.getPreviousPosition()) + d);
+			if (dist_to_triangle <= 0.0f)
+			{
+				std::cout << "min avstand" << std::endl;
+				std::cout << p.getCurrentPosition()[0] << ", " << p.getCurrentPosition()[1] << ", " << p.getCurrentPosition()[2] << std::endl;
+
+				glm::vec3 new_pos = - 2.0f * glm::dot(p.getCurrentPosition(), triangle_normal) * triangle_normal;
+				//(triangle_normal * p.getCurrentPosition() + dist_to_triangle) * triangle_normal;
+				p.setPosition(new_pos);
+
+				glm::vec3 new_vel = p.getVelocity() - (1.0f + p.getBouncing()) * glm::dot(p.getVelocity(), triangle_normal) * triangle_normal;
+					//(triangle_normal * p.getVelocity()) * triangle_normal;
+				p.setVelocity(new_vel);
+				std::cout << new_pos[0] << ", " << new_pos[1] << ", " << new_pos[2] << std::endl;
+				p.setVelocity(glm::vec3(0));
+				p.setForce(glm::vec3(0));
+			}
+		}
+
+		//Check for sphere collisions
+		if (glm::length(p.getCurrentPosition()) <= sphere.getRadius())
+		{
+			//glm::vec3 new_pos = p.getCurrentPosition()
+
+			glm::vec3 new_vel = p.getVelocity() - (1.0f + p.getBouncing()) * glm::dot(p.getVelocity(), glm::normalize(p.getCurrentPosition())) * glm::normalize(p.getCurrentPosition());
+			p.setVelocity(new_vel);
+		}
+
+
+
+
+
+
+
+		//Update the vertix-array with the new particle positions
+		GLfloat particle_vertices[n_particles * 3] =
+		{
+			p.getCurrentPosition()[0], p.getCurrentPosition()[1], p.getCurrentPosition()[2]
+		};
+
+		//Send the updated data to the buffer
+		glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer4);
+		glBufferData(GL_ARRAY_BUFFER, n_particles * 3 * sizeof(GLfloat), &particle_vertices[0], GL_STATIC_DRAW);
+
+		//std::cout << p.getCurrentPosition()[0] << ", " << p.getCurrentPosition()[1] << ", " << p.getCurrentPosition()[2] << " tid: " << dt << std::endl;
+		//for (int i = 0; i < 5; i++)
+			//std::cout << "box" << i << " :" << box_restrictions[i].dconst << std::endl; //[0] << box_restrictions[i].dconst[1]  << box_restrictions[i].dconst[2] << std::endl;
 
 	} // Check if the ESC key was pressed or the window was closed
 	while (glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS &&
 		glfwWindowShouldClose(window) == 0);
 
 	// Cleanup VBO and shader
+	glDeleteBuffers(1, &vertexbuffer1);
 	glDeleteBuffers(1, &vertexbuffer2);
+	glDeleteBuffers(1, &vertexbuffer3);
 	glDeleteBuffers(1, &uvbuffer1);
 	glDeleteBuffers(1, &normalbuffer1);
 	glDeleteBuffers(1, &elementbuffer1);
+	glDeleteBuffers(1, &elementbuffer2);
+	glDeleteBuffers(1, &elementbuffer3);
+	glDeleteBuffers(1, &colorbuffer1);
 	glDeleteProgram(programID);
 	glDeleteVertexArrays(1, &VertexArrayID);
 

@@ -1,5 +1,4 @@
 #include "Box.hpp"
-#include <iostream>
 
 Box::Box(float w, float h, float l)
 	:width(w), height(h), length(l)
@@ -28,8 +27,8 @@ Box::Box(float w, float h, float l)
 	{
 		0,1,2,
 		0,2,3,
-		4,0,5,
-		0,3,5,
+		1,6,2,
+		1,7,6,
 		4,5,6,
 		4,6,7,
 		2,6,3,
@@ -50,5 +49,10 @@ std::vector<GLfloat> Box::getVertices()
 std::vector<GLushort> Box::getIndices()
 {
 	return indices;
+}
+
+glm::vec3 Box::getMeasurements()
+{
+	return glm::vec3(width, height, length);
 }
 
