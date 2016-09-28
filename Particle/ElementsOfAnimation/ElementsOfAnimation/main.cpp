@@ -39,18 +39,22 @@ int main(void)
 
 	//-------------- Create particles -----------------------
 
-	Particle p(0.0f, 2.0f, 0.0f); //initial position of the particle
-	p.setLifetime(50.0f);
-	p.setBouncing(0.95f);
-	p.addForce(0, -9.8f, 0);
-	p.setVelocity(0.1, 0, 0.1);
+	const int n_particles = 1000;
+	std::vector<Particle> all_particles;
+	for (int i = 0; i < n_particles; i++)
+	{
+		float randx = (((double)rand() / (RAND_MAX))) - 0.5f;
+		float randz = (((double)rand() / (RAND_MAX))) - 0.5f;
+		all_particles.push_back(Particle(randx, 2.0f, randz));
+		//Particle p(1.0f, 2.0f, 1.5f); //initial position of the particle
+		all_particles[i].setLifetime(500.0f);
+		all_particles[i].setBouncing(0.8f);
+		all_particles[i].addForce(0.0f, -9.8f, 0.0f);
+		all_particles[i].setVelocity(0.0f, 0.0f, 0.0f);
+	}
+
 
 	// Define a box made out of planes, for collision
-
-	glm::vec3 punt(0.0f);
-	glm::vec3 normal(0, 1, 0);
-	Plane plane(punt, normal);
-
 	Plane box_restrictions[5] = {
 		Plane(glm::vec3(0, -boxen.getMeasurements()[1] / 2,0), glm::vec3(0,1,0)),
 		Plane(glm::vec3(boxen.getMeasurements()[0] / 2,0,0), glm::vec3(-1,0,0)),
@@ -59,9 +63,6 @@ int main(void)
 		Plane(glm::vec3(0,0,-boxen.getMeasurements()[2] / 2), glm::vec3(0,0,1))
 	};
 
-	float disact[5], disant[5];
-	for (int i = 0; i < 5; i++)
-		disact[i] = box_restrictions[i].distPoint2Plane(p.getCurrentPosition());
 
 	//-------------------------------------------------------
 
@@ -192,18 +193,27 @@ int main(void)
 	//-------------- Particle buffers start --------------------
 
 	// Set point size, points used for particle rendering
-	glPointSize(50);
+	glPointSize(10);
 
-	const int n_particles = 1;
+	std::vector<GLfloat> particle_vertices;
+	std::vector<GLushort> particle_indices;
 
-	GLfloat particle_vertices[n_particles * 3] =
+	for (int i = 0; i < n_particles; i++)
+	{
+		particle_vertices.push_back(all_particles[i].getCurrentPosition()[0]);
+		particle_vertices.push_back(all_particles[i].getCurrentPosition()[1]);
+		particle_vertices.push_back(all_particles[i].getCurrentPosition()[2]);
+		particle_indices.push_back((GLushort)i);
+	}
+
+	/*GLfloat particle_vertices[n_particles * 3] =
 	{
 		p.getCurrentPosition()[0], p.getCurrentPosition()[1], p.getCurrentPosition()[2]
 	};
 	GLushort particle_indices[n_particles] =
 	{
 		0
-	};
+	};*/
 
 	GLuint vertexbuffer4;
 	glGenBuffers(1, &vertexbuffer4);
@@ -227,7 +237,7 @@ int main(void)
 
 	//Create a vector with random colors
 	std::vector<GLfloat> colors;
-	for(int i = 0; i < boxen.getVertices().size() + sphere.getVertices().size() + n_particles; i++)
+	for(int i = 0; i < boxen.getVertices().size() + sphere.getVertices().size() /*+ particle_vertices.size()*/; i++)
 		colors.push_back((((double) rand() / (RAND_MAX))));
 
 	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * colors.size(), &colors.front(), GL_STATIC_DRAW);
@@ -251,7 +261,7 @@ int main(void)
 		glm::mat4 ProjectionMatrix = getProjectionMatrix();
 		glm::mat4 ViewMatrix = getViewMatrix();
 
-		//-------------- Start rendering first object ------------------------
+		//-------------- Start rendering sphere ------------------------------
 
 		glm::mat4 ModelMatrix1 = glm::mat4(3.0);
 		glm::mat4 MVP1 = ProjectionMatrix * ViewMatrix * ModelMatrix1;
@@ -298,9 +308,9 @@ int main(void)
 			(void*)0           // element array buffer offset
 		);
 
-		//-------------- End of rendering first object -----------------------
+		//-------------- End of rendering sphere -----------------------------
 
-		//-------------- Start rendering second object -----------------------
+		//-------------- Start rendering box ---------------------------------
 
 		glm::mat4 ModelMatrix2 = glm::mat4(1.0);
 		glm::mat4 MVP2 = ProjectionMatrix * ViewMatrix * ModelMatrix2;
@@ -333,9 +343,9 @@ int main(void)
 			(void*)0           // element array buffer offset
 		);
 
-		//-------------- End of rendering second object ----------------------
+		//-------------- End of rendering box --------------------------------
 
-		//-------------- Start rendering third object ------------------------
+		//-------------- Start rendering triangle ----------------------------
 
 		glm::mat4 ModelMatrix3 = glm::mat4(1.0);
 		glm::mat4 MVP3 = ProjectionMatrix * ViewMatrix * ModelMatrix3;
@@ -368,7 +378,7 @@ int main(void)
 			(void*)0           // element array buffer offset
 		);
 
-		//-------------- End of rendering third object -----------------------
+		//-------------- End of rendering triangle ---------------------------
 
 		//-------------- Start rendering particles ---------------------------
 
@@ -398,7 +408,7 @@ int main(void)
 		// Draw the triangles !
 		glDrawElements(
 			GL_POINTS,      // mode
-			3,    // count
+			particle_indices.size(),    // count
 			GL_UNSIGNED_SHORT,   // type
 			(void*)0           // element array buffer offset
 		);
@@ -414,92 +424,84 @@ int main(void)
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 
-		std::this_thread::sleep_for(std::chrono::milliseconds(1000*3 / fps));
+		std::this_thread::sleep_for(std::chrono::milliseconds(1000 / fps));
 
 		//Pass time variable to uniform variable in fragmentshader
 		glUniform1f(TimeID, passed_time);
 		passed_time = (GetTickCount() - start_time) * 0.001f;
 
-		p.updateParticle(dt, Particle::UpdateMethod::EulerOrig);
-		p.setLifetime(p.getLifetime() - dt);
-
-		//Check for plane collisions
-		for (int i = 0; i < 5; i++)
+		//Here starts the loop for calulating new positions and velocities for particles
+		for (int i = 0; i < n_particles; i++)
 		{
-			disant[i] = disact[i];
-			disact[i] = box_restrictions[i].distPoint2Plane(p.getCurrentPosition());
-			if (disant[i] * disact[i] < 0.0f) {
-				glm::vec3 new_pos = p.getCurrentPosition() - (1.0f + p.getBouncing()) * (box_restrictions[i].normal * p.getCurrentPosition() + box_restrictions[i].dconst) * box_restrictions[i].normal;
-				p.setPosition(new_pos);
-				glm::vec3 new_vel = p.getVelocity() - (1.0f + p.getBouncing()) * (box_restrictions[i].normal * p.getVelocity()) * box_restrictions[i].normal;
-				p.setVelocity(new_vel);
-				disact[i] = -disact[i];
-			}
-		}
+			Particle *p = &all_particles[i];
 
-		//Check for triangle collisions
-		glm::vec3 A = glm::vec3(triangle_vertices[0], triangle_vertices[1], triangle_vertices[2]);
-		glm::vec3 B = glm::vec3(triangle_vertices[3], triangle_vertices[4], triangle_vertices[5]);
-		glm::vec3 C = glm::vec3(triangle_vertices[6], triangle_vertices[7], triangle_vertices[8]);
-		glm::vec3 triangle_normal = glm::cross((B - A), (C - A));
-		triangle_normal = triangle_normal / length(triangle_normal);
-		glm::vec3 particle_projection = p.getCurrentPosition() - glm::dot(p.getCurrentPosition() - A, triangle_normal) * triangle_normal;
+			float disact[5], disant[5];
+			for (int i = 0; i < 5; i++)
+				disact[i] = box_restrictions[i].distPoint2Plane(p->getCurrentPosition());
 
-		float A1 = (1.0f / 2.0f) * glm::length(glm::cross(B - particle_projection, C - particle_projection));
-		float A2 = (1.0f / 2.0f) * glm::length(glm::cross(particle_projection - A, C - A));
-		float A3 = (1.0f / 2.0f) * glm::length(glm::cross(B - A, particle_projection - A));
-		float A4 = (1.0f / 2.0f) * glm::length(glm::cross(B - A, C - A));
+			p->updateParticle(dt, Particle::UpdateMethod::EulerOrig);
+			p->setLifetime(p->getLifetime() - dt);
 
-		if (!(A1 + A2 + A3 > A4))
-		{
-			float d = -1.0f * dot(triangle_normal, glm::vec3(triangle_vertices[0], triangle_vertices[1], triangle_vertices[2]));
-			float dist_to_triangle = (dot(triangle_normal, p.getCurrentPosition()) + d) * (dot(triangle_normal, p.getPreviousPosition()) + d);
-			if (dist_to_triangle <= 0.0f)
+			//Check for plane collisions
+			for (int i = 0; i < 5; i++)
 			{
-				std::cout << "min avstand" << std::endl;
-				std::cout << p.getCurrentPosition()[0] << ", " << p.getCurrentPosition()[1] << ", " << p.getCurrentPosition()[2] << std::endl;
-
-				glm::vec3 new_pos = - 2.0f * glm::dot(p.getCurrentPosition(), triangle_normal) * triangle_normal;
-				//(triangle_normal * p.getCurrentPosition() + dist_to_triangle) * triangle_normal;
-				p.setPosition(new_pos);
-
-				glm::vec3 new_vel = p.getVelocity() - (1.0f + p.getBouncing()) * glm::dot(p.getVelocity(), triangle_normal) * triangle_normal;
-					//(triangle_normal * p.getVelocity()) * triangle_normal;
-				p.setVelocity(new_vel);
-				std::cout << new_pos[0] << ", " << new_pos[1] << ", " << new_pos[2] << std::endl;
-				p.setVelocity(glm::vec3(0));
-				p.setForce(glm::vec3(0));
+				disant[i] = disact[i];
+				disact[i] = box_restrictions[i].distPoint2Plane(p->getCurrentPosition());
+				if (disant[i] * disact[i] < 0.0f) {
+					glm::vec3 new_pos = p->getCurrentPosition() - (1.0f + p->getBouncing()) * (box_restrictions[i].normal * p->getCurrentPosition() + box_restrictions[i].dconst) * box_restrictions[i].normal;
+					p->setPosition(new_pos);
+					glm::vec3 new_vel = p->getVelocity() - (1.0f + p->getBouncing()) * (box_restrictions[i].normal * p->getVelocity()) * box_restrictions[i].normal;
+					p->setVelocity(new_vel);
+					disact[i] = -disact[i];
+				}
 			}
-		}
 
-		//Check for sphere collisions
-		if (glm::length(p.getCurrentPosition()) <= sphere.getRadius())
-		{
-			//glm::vec3 new_pos = p.getCurrentPosition()
+			//Check for triangle collisions
+			glm::vec3 A = glm::vec3(triangle_vertices[0], triangle_vertices[1], triangle_vertices[2]);
+			glm::vec3 B = glm::vec3(triangle_vertices[3], triangle_vertices[4], triangle_vertices[5]);
+			glm::vec3 C = glm::vec3(triangle_vertices[6], triangle_vertices[7], triangle_vertices[8]);
+			glm::vec3 triangle_normal = glm::normalize(glm::cross((B - A), (C - A)));
+			glm::vec3 particle_projection = p->getCurrentPosition() - glm::dot(p->getCurrentPosition() - A, triangle_normal) * triangle_normal;
 
-			glm::vec3 new_vel = p.getVelocity() - (1.0f + p.getBouncing()) * glm::dot(p.getVelocity(), glm::normalize(p.getCurrentPosition())) * glm::normalize(p.getCurrentPosition());
-			p.setVelocity(new_vel);
-		}
+			float A1 = (1.0f / 2.0f) * glm::length(glm::cross(B - particle_projection, C - particle_projection));
+			float A2 = (1.0f / 2.0f) * glm::length(glm::cross(particle_projection - A, C - A));
+			float A3 = (1.0f / 2.0f) * glm::length(glm::cross(B - A, particle_projection - A));
+			float A4 = (1.0f / 2.0f) * glm::length(glm::cross(B - A, C - A));
+
+			if ((A1 + A2 + A3 - A4) >= 0)
+			{
+				float d = -1.0f * dot(triangle_normal, glm::vec3(triangle_vertices[0], triangle_vertices[1], triangle_vertices[2]));
+				float dist_to_triangle = (dot(triangle_normal, p->getCurrentPosition()) + d) * (dot(triangle_normal, p->getPreviousPosition()) + d);
+				if (dist_to_triangle <= 0.0f)
+				{
+					glm::vec3 new_pos = p->getCurrentPosition() - 2.0f * (glm::dot(p->getCurrentPosition(), triangle_normal) + d) * triangle_normal;
+					p->setPosition(new_pos);
+
+					glm::vec3 new_vel = p->getVelocity() - (1.0f + p->getBouncing()) * glm::dot(p->getVelocity(), triangle_normal) * triangle_normal;
+					p->setVelocity(new_vel);
+				}
+			}
 
 
+			//Check for sphere collisions
+			if (glm::length(p->getCurrentPosition()) <= sphere.getRadius())
+			{
+				//glm::vec3 new_pos = p.getCurrentPosition()
 
+				glm::vec3 new_vel = p->getVelocity() - (1.0f + p->getBouncing()) * glm::dot(p->getVelocity(), glm::normalize(p->getCurrentPosition())) * glm::normalize(p->getCurrentPosition());
+				p->setVelocity(new_vel);
+			}
 
+			//Update the vertix-array with the new particle positions
+			particle_vertices[i * 3] = p->getCurrentPosition()[0];
+			particle_vertices[(i * 3) + 1] = p->getCurrentPosition()[1];
+			particle_vertices[(i * 3) + 2] = p->getCurrentPosition()[2];
 
-
-
-		//Update the vertix-array with the new particle positions
-		GLfloat particle_vertices[n_particles * 3] =
-		{
-			p.getCurrentPosition()[0], p.getCurrentPosition()[1], p.getCurrentPosition()[2]
-		};
+		} //End of particle loop
 
 		//Send the updated data to the buffer
 		glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer4);
 		glBufferData(GL_ARRAY_BUFFER, n_particles * 3 * sizeof(GLfloat), &particle_vertices[0], GL_STATIC_DRAW);
-
-		//std::cout << p.getCurrentPosition()[0] << ", " << p.getCurrentPosition()[1] << ", " << p.getCurrentPosition()[2] << " tid: " << dt << std::endl;
-		//for (int i = 0; i < 5; i++)
-			//std::cout << "box" << i << " :" << box_restrictions[i].dconst << std::endl; //[0] << box_restrictions[i].dconst[1]  << box_restrictions[i].dconst[2] << std::endl;
 
 	} // Check if the ESC key was pressed or the window was closed
 	while (glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS &&
