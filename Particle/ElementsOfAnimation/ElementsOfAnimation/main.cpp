@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <vector>
+#include <algorithm>
 #include <iostream>
 #include <chrono>
 #include <thread>
@@ -39,20 +40,18 @@ int main(void)
 
 	//-------------- Create particles -----------------------
 
-	const int n_particles = 1000;
+	const int n_particles = 500;
 	std::vector<Particle> all_particles;
+	all_particles.reserve(n_particles);
+
 	for (int i = 0; i < n_particles; i++)
 	{
-		float randx = (((double)rand() / (RAND_MAX))) - 0.5f;
-		float randz = (((double)rand() / (RAND_MAX))) - 0.5f;
-		all_particles.push_back(Particle(randx, 2.0f, randz));
-		//Particle p(1.0f, 2.0f, 1.5f); //initial position of the particle
+		all_particles.push_back(Particle(0.0f, 0.0f, 0.0f));
 		all_particles[i].setLifetime(500.0f);
 		all_particles[i].setBouncing(0.8f);
-		all_particles[i].addForce(0.0f, -9.8f, 0.0f);
+		all_particles[i].addForce(0.0f, 0.0f, 0.0f);
 		all_particles[i].setVelocity(0.0f, 0.0f, 0.0f);
 	}
-
 
 	// Define a box made out of planes, for collision
 	Plane box_restrictions[5] = {
@@ -198,6 +197,7 @@ int main(void)
 	std::vector<GLfloat> particle_vertices;
 	std::vector<GLushort> particle_indices;
 
+	
 	for (int i = 0; i < n_particles; i++)
 	{
 		particle_vertices.push_back(all_particles[i].getCurrentPosition()[0]);
@@ -205,15 +205,6 @@ int main(void)
 		particle_vertices.push_back(all_particles[i].getCurrentPosition()[2]);
 		particle_indices.push_back((GLushort)i);
 	}
-
-	/*GLfloat particle_vertices[n_particles * 3] =
-	{
-		p.getCurrentPosition()[0], p.getCurrentPosition()[1], p.getCurrentPosition()[2]
-	};
-	GLushort particle_indices[n_particles] =
-	{
-		0
-	};*/
 
 	GLuint vertexbuffer4;
 	glGenBuffers(1, &vertexbuffer4);
@@ -237,7 +228,7 @@ int main(void)
 
 	//Create a vector with random colors
 	std::vector<GLfloat> colors;
-	for(int i = 0; i < boxen.getVertices().size() + sphere.getVertices().size() /*+ particle_vertices.size()*/; i++)
+	for(int i = 0; i < boxen.getVertices().size() + sphere.getVertices().size() + particle_vertices.size(); i++)
 		colors.push_back((((double) rand() / (RAND_MAX))));
 
 	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * colors.size(), &colors.front(), GL_STATIC_DRAW);
@@ -248,7 +239,26 @@ int main(void)
 	// Ensure we can capture the escape key being pressed below
 	glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
 
+	// Reset mouse position for next frame
+	glfwSetCursorPos(window, 1024 / 2, 768 / 2);
+
+	int loop_n = 0;
+
 	do {
+
+
+		//"Spawn" the particle as the loop iterates
+		if (loop_n < n_particles)
+		{
+			float randx = (((double)rand() / (RAND_MAX)) - 0.5f) * 0.2f;
+			float randz = (((double)rand() / (RAND_MAX)) - 0.5f) * 0.2f;
+			all_particles[loop_n] = Particle(randx, 1.5f, randz);
+			all_particles[loop_n].setForce(0.0f, -9.8f, 0.0f);
+			loop_n++;
+			//if (loop_n == n_particles)
+				//loop_n = 0;
+		}
+
 
 		// Clear the screen
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -439,7 +449,7 @@ int main(void)
 			for (int i = 0; i < 5; i++)
 				disact[i] = box_restrictions[i].distPoint2Plane(p->getCurrentPosition());
 
-			p->updateParticle(dt, Particle::UpdateMethod::EulerOrig);
+			p->updateParticle(dt, Particle::UpdateMethod::EulerSemi);
 			p->setLifetime(p->getLifetime() - dt);
 
 			//Check for plane collisions
@@ -486,7 +496,9 @@ int main(void)
 			//Check for sphere collisions
 			if (glm::length(p->getCurrentPosition()) <= sphere.getRadius())
 			{
-				//glm::vec3 new_pos = p.getCurrentPosition()
+				float dist = sphere.getRadius() - glm::length(p->getCurrentPosition());
+				glm::vec3 new_pos = glm::normalize(p->getCurrentPosition()) * (sphere.getRadius() + dist);
+				p->setPosition(new_pos);
 
 				glm::vec3 new_vel = p->getVelocity() - (1.0f + p->getBouncing()) * glm::dot(p->getVelocity(), glm::normalize(p->getCurrentPosition())) * glm::normalize(p->getCurrentPosition());
 				p->setVelocity(new_vel);

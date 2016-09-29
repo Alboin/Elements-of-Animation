@@ -6,7 +6,7 @@ Particle::Particle()
 }
 
 Particle::Particle(const float& x, const float& y, const float& z) :
-m_previousPosition(0, 0, 0), m_velocity(0, 0, 0), m_force(0, 0, 0), m_bouncing(1), m_lifetime(50), m_fixed(false)
+m_previousPosition(x, y, z), m_velocity(0, 0, 0), m_force(0, 0, 0), m_bouncing(1), m_lifetime(50), m_fixed(false)
 {
 	m_currentPosition.x = x;
 	m_currentPosition.y = y;
@@ -146,12 +146,17 @@ void Particle::updateParticle(const float& dt, UpdateMethod method)
 			break;
 		case UpdateMethod::EulerSemi:
 		{
-									 // to be implemented
+			m_previousPosition = m_currentPosition;
+			m_velocity += m_force*dt;
+			m_currentPosition += m_velocity*dt;
 		}
 			break;
 		case UpdateMethod::Verlet:
 		{
-									 // to be implemented
+			glm::vec3 temp = m_currentPosition;
+			m_velocity += m_force*dt;
+			m_currentPosition += 0.3f * (m_currentPosition - m_previousPosition) + m_velocity*dt;
+			m_previousPosition = temp;
 		}
 			break;
 		}
