@@ -39,6 +39,20 @@ Box::Box(float w, float h, float l)
 
 	for (int i = 0; i < 30; i++)
 		indices.push_back(indxs[i]);
+
+	GLfloat nrmls[30] =
+	{
+		-1.0, 0.0, 0.0,
+		-1.0, 0.0, 0.0,
+		 0.0, 1.0, 0.0,
+		 0.0, 1.0, 0.0,
+		 1.0, 0.0, 0.0,
+		 1.0, 0.0, 0.0,
+		 0.0, 0.0,-1.0,
+		 0.0, 0.0,-1.0,
+		 0.0, 0.0, 1.0,
+		 0.0, 0.0, 1.0
+	};
 }
 
 std::vector<GLfloat> Box::getVertices()

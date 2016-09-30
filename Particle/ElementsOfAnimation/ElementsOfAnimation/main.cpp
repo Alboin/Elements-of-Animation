@@ -31,12 +31,14 @@ int main(void)
 	float dt = 1 / (float)fps; //simulation time-step
 	int start_time = GetTickCount();
 	float passed_time = 0.0;
+	const int window_w = 1200;
+	const int window_h = 800;
 
 	//Create Sphere
 	SolidSphere sphere(1, 12, 24);
 
 	//Create box
-	Box boxen(5, 4, 10);
+	Box boxen(6, 4, 10);
 
 	//-------------- Create particles -----------------------
 
@@ -45,13 +47,7 @@ int main(void)
 	all_particles.reserve(n_particles);
 
 	for (int i = 0; i < n_particles; i++)
-	{
 		all_particles.push_back(Particle(0.0f, 0.0f, 0.0f));
-		all_particles[i].setLifetime(500.0f);
-		all_particles[i].setBouncing(0.8f);
-		all_particles[i].addForce(0.0f, 0.0f, 0.0f);
-		all_particles[i].setVelocity(0.0f, 0.0f, 0.0f);
-	}
 
 	// Define a box made out of planes, for collision
 	Plane box_restrictions[5] = {
@@ -79,7 +75,7 @@ int main(void)
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 	// Open a window and create its OpenGL context
-	window = glfwCreateWindow(1024, 768, "Particle", NULL, NULL);
+	window = glfwCreateWindow(window_w, window_h, "Particle", NULL, NULL);
 
 	if (window == NULL) {
 		fprintf(stderr, "Failed to open GLFW window. If you have an Intel GPU, they are not 3.3 compatible. Try the 2.1 version of the tutorials.\n");
@@ -99,7 +95,7 @@ int main(void)
 	}
 
 	// Set background color
-	glClearColor(0.9f, 0.9f, 0.9f, 0.0f);
+	glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
 
 	// Enable depth test
 	glEnable(GL_DEPTH_TEST);
@@ -240,7 +236,7 @@ int main(void)
 	glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
 
 	// Reset mouse position for next frame
-	glfwSetCursorPos(window, 1024 / 2, 768 / 2);
+	glfwSetCursorPos(window, window_w / 2, window_h / 2);
 
 	int loop_n = 0;
 
@@ -250,10 +246,11 @@ int main(void)
 		//"Spawn" the particle as the loop iterates
 		if (loop_n < n_particles)
 		{
-			float randx = (((double)rand() / (RAND_MAX)) - 0.5f) * 0.2f;
-			float randz = (((double)rand() / (RAND_MAX)) - 0.5f) * 0.2f;
-			all_particles[loop_n] = Particle(randx, 1.5f, randz);
+			float randx = (((double)rand() / (RAND_MAX)) - 0.5f) * 0.3f;
+			float randz = (((double)rand() / (RAND_MAX)) - 0.5f) * 0.3f;
+			all_particles[loop_n] = Particle(randx, 3.5f, randz);
 			all_particles[loop_n].setForce(0.0f, -9.8f, 0.0f);
+			all_particles[loop_n].setBouncing(0.9f);
 			loop_n++;
 			//if (loop_n == n_particles)
 				//loop_n = 0;
@@ -267,7 +264,7 @@ int main(void)
 		glUseProgram(programID);
 
 		// Compute the MVP matrix from keyboard and mouse input
-		computeMatricesFromInputs();
+		computeMatricesFromInputs(window_w, window_h);
 		glm::mat4 ProjectionMatrix = getProjectionMatrix();
 		glm::mat4 ViewMatrix = getViewMatrix();
 
@@ -414,7 +411,7 @@ int main(void)
 
 		// Index buffer
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementbuffer4);
-
+		
 		// Draw the triangles !
 		glDrawElements(
 			GL_POINTS,      // mode
@@ -449,7 +446,7 @@ int main(void)
 			for (int i = 0; i < 5; i++)
 				disact[i] = box_restrictions[i].distPoint2Plane(p->getCurrentPosition());
 
-			p->updateParticle(dt, Particle::UpdateMethod::EulerSemi);
+			p->updateParticle(dt, Particle::UpdateMethod::Verlet);
 			p->setLifetime(p->getLifetime() - dt);
 
 			//Check for plane collisions
@@ -461,6 +458,7 @@ int main(void)
 					glm::vec3 new_pos = p->getCurrentPosition() - (1.0f + p->getBouncing()) * (box_restrictions[i].normal * p->getCurrentPosition() + box_restrictions[i].dconst) * box_restrictions[i].normal;
 					p->setPosition(new_pos);
 					glm::vec3 new_vel = p->getVelocity() - (1.0f + p->getBouncing()) * (box_restrictions[i].normal * p->getVelocity()) * box_restrictions[i].normal;
+					new_vel = new_vel - 0.3f * (new_vel - (box_restrictions[i].normal * new_vel) * box_restrictions[i].normal);
 					p->setVelocity(new_vel);
 					disact[i] = -disact[i];
 				}

@@ -6,9 +6,9 @@ c:\users\albin\documents\github\elements-of-animation\particle\elementsofanimati
 c:\users\albin\documents\github\elements-of-animation\particle\elementsofanimation\elementsofanimation\solidsphere.cpp(33): warning C4305: 'initializing': truncation from 'double' to 'float'
 c:\users\albin\documents\github\elements-of-animation\particle\elementsofanimation\elementsofanimation\solidsphere.cpp(41): warning C4018: '<': signed/unsigned mismatch
 c:\users\albin\documents\github\elements-of-animation\particle\elementsofanimation\elementsofanimation\solidsphere.cpp(55): warning C4018: '<': signed/unsigned mismatch
-c:\users\albin\documents\github\elements-of-animation\particle\elementsofanimation\elementsofanimation\main.cpp(240): warning C4018: '<': signed/unsigned mismatch
-c:\users\albin\documents\github\elements-of-animation\particle\elementsofanimation\elementsofanimation\main.cpp(241): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
-c:\users\albin\documents\github\elements-of-animation\particle\elementsofanimation\elementsofanimation\main.cpp(262): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-c:\users\albin\documents\github\elements-of-animation\particle\elementsofanimation\elementsofanimation\main.cpp(263): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+c:\users\albin\documents\github\elements-of-animation\particle\elementsofanimation\elementsofanimation\main.cpp(227): warning C4018: '<': signed/unsigned mismatch
+c:\users\albin\documents\github\elements-of-animation\particle\elementsofanimation\elementsofanimation\main.cpp(228): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+c:\users\albin\documents\github\elements-of-animation\particle\elementsofanimation\elementsofanimation\main.cpp(249): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+c:\users\albin\documents\github\elements-of-animation\particle\elementsofanimation\elementsofanimation\main.cpp(250): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
   ElementsOfAnimation.vcxproj -> C:\Users\Albin\Documents\GitHub\Elements-of-Animation\Particle\ElementsOfAnimation\Debug\ElementsOfAnimation.exe
   ElementsOfAnimation.vcxproj -> C:\Users\Albin\Documents\GitHub\Elements-of-Animation\Particle\ElementsOfAnimation\Debug\ElementsOfAnimation.pdb (Partial PDB)
