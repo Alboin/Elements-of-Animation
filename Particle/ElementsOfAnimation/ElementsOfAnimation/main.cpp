@@ -20,10 +20,10 @@ using namespace glm;
 
 #include "shader.hpp"
 #include "controls.hpp"
-#include "Box.hpp"
 #include "SolidSphere.cpp"
 #include "Particle.h"
 #include "Geometry.h"
+#include "Cloth.h"
 
 int main(void)
 {
@@ -49,6 +49,12 @@ int main(void)
 	//Create a floor for the particles
 	Plane floor(glm::vec3(0, -2, 0), glm::vec3(0, 1, 0));
 
+
+	//-------------------------------------------------------
+
+	//-------------- Create cloth ---------------------------
+
+	Cloth cloth(10, 10, 0.5, glm::vec3(0.5f, 2.0f, 1.0f), glm::vec3(-0.5f, 2.0f, 1.0f));
 
 	//-------------------------------------------------------
 
@@ -201,6 +207,22 @@ int main(void)
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, plane_indices.size() * sizeof(GLushort), &plane_indices[0], GL_STATIC_DRAW);
 
 	//-------------- Plane buffers end -------------------------
+
+	//-------------- Cloth buffers start -----------------------
+
+	GLuint vertexbuffer3;
+	glGenBuffers(1, &vertexbuffer3);
+	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer3);
+	glBufferData(GL_ARRAY_BUFFER, cloth.particle_vertices.size() * sizeof(glm::vec3), &cloth.particle_vertices[0], GL_STATIC_DRAW);
+
+	// Generate a buffer for the indices as well
+	GLuint elementbuffer3;
+	glGenBuffers(1, &elementbuffer3);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementbuffer3);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, cloth.particle_indices.size() * sizeof(GLushort), &cloth.particle_indices[0], GL_STATIC_DRAW);
+
+	//-------------- Cloth buffers end -------------------------
+
 
 	//-------------- Create random colors ----------------------
 
@@ -388,6 +410,42 @@ int main(void)
 		);
 
 		//-------------- End of rendering particles --------------------------
+
+		//-------------- Start rendering particles ---------------------------
+
+		glm::mat4 ModelMatrix3 = glm::mat4(1.0);
+		glm::mat4 MVP3 = ProjectionMatrix * ViewMatrix * ModelMatrix3;
+
+		// Send our transformation to the currently bound shader, 
+		// in the "MVP" uniform
+		glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP3[0][0]);
+		glUniformMatrix4fv(ModelMatrixID, 1, GL_FALSE, &ModelMatrix3[0][0]);
+
+		// 1rst attribute buffer : vertices
+		glEnableVertexAttribArray(0);
+		glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer3);
+		glVertexAttribPointer(
+			0,                  // attribute
+			3,                  // size
+			GL_FLOAT,           // type
+			GL_FALSE,           // normalized?
+			0,                  // stride
+			(void*)0            // array buffer offset
+		);
+
+		// Index buffer
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementbuffer3);
+
+		// Draw the triangles !
+		glDrawElements(
+			GL_POINTS,      // mode
+			cloth.particle_indices.size(),    // count
+			GL_UNSIGNED_SHORT,   // type
+			(void*)0           // element array buffer offset
+		);
+
+		//-------------- End of rendering particles --------------------------
+
 
 
 		glDisableVertexAttribArray(0);

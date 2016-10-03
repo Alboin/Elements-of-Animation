@@ -24,9 +24,6 @@
     <ClCompile Include="controls.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Box.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="SolidSphere.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -34,6 +31,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Geometry.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Cloth.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -44,13 +44,13 @@
     <ClInclude Include="controls.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Box.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Particle.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Geometry.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Cloth.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

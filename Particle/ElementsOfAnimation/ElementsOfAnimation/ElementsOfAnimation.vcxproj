@@ -118,16 +118,16 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Cloth.cpp" />
     <ClCompile Include="controls.cpp" />
     <ClCompile Include="Geometry.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Particle.cpp" />
     <ClCompile Include="shader.cpp" />
-    <ClCompile Include="Box.cpp" />
     <ClCompile Include="SolidSphere.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Box.hpp" />
+    <ClInclude Include="Cloth.h" />
     <ClInclude Include="controls.hpp" />
     <ClInclude Include="Geometry.h" />
     <ClInclude Include="Particle.h" />
