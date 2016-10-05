@@ -41,7 +41,7 @@ int main(void)
 	Plane collision_plane = Plane(glm::vec3(0, -2, 0), glm::vec3(0, 1, 0));
 
 	//Create cloth
-	Cloth cloth(20, 30, 3, 2, 3.14*2/4);
+	Cloth cloth(20, 30, 3, 2, -3.14*2/4);
 
 
 	// Initialise GLFW
@@ -392,8 +392,10 @@ int main(void)
 			if (disant * disact < 0.0f) {
 				glm::vec3 new_pos = p->getCurrentPosition() - (1.0f + p->getBouncing()) * (collision_plane.normal * p->getCurrentPosition() + collision_plane.dconst) * collision_plane.normal;
 				p->setPosition(new_pos);
+				//Bounce
 				glm::vec3 new_vel = p->getVelocity() - (1.0f + p->getBouncing()) * (collision_plane.normal * p->getVelocity()) * collision_plane.normal;
-				new_vel = new_vel - 0.3f * (new_vel - (collision_plane.normal * new_vel) * collision_plane.normal);
+				//Friction
+				//new_vel = new_vel - 0.3f * (new_vel - (collision_plane.normal * new_vel) * collision_plane.normal);
 				p->setVelocity(new_vel);
 				disact = -disact;
 			}
