@@ -6,7 +6,7 @@ Particle::Particle()
 }
 
 Particle::Particle(const float& x, const float& y, const float& z) :
-m_previousPosition(x, y, z), m_velocity(0, 0, 0), m_force(0, 0, 0), m_bouncing(1), m_lifetime(50), m_fixed(false)
+m_previousPosition(x, y, z), m_velocity(0, 0, 0), m_force(0, 0, 0), m_bouncing(1), m_lifetime(500), m_fixed(false)
 {
 	m_currentPosition.x = x;
 	m_currentPosition.y = y;
@@ -133,7 +133,7 @@ bool Particle::isFixed()
 
 void Particle::updateParticle(const float& dt, UpdateMethod method)
 {
-	if (!m_fixed & m_lifetime > 0)
+	if (!m_fixed && m_lifetime > 0)
 	{
 		switch (method)
 		{
