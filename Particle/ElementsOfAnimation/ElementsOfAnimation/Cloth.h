@@ -19,10 +19,12 @@ public:
 	void setSpringConstant(float k);
 	void setSpringDamping(float d);
 	void calcSpringForces();
+	void updateNormals();
 
 	std::vector<Particle> particles;
 	std::vector<glm::vec3> particle_vertices;
 	std::vector<GLushort> particle_indices;
+	std::vector<glm::vec3> normals;
 	int width, height;
 	float spring_constant, spring_length, spring_damping;
 };

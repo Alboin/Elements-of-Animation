@@ -25,12 +25,44 @@ Cloth::Cloth(int cloth_width, int cloth_height, float real_width, float starting
 			particles.back().setBouncing(0.1);
 			particle_vertices.push_back(glm::vec3(pos[0], pos[1], pos[2]));
 
-			//Indexing
-			particle_indices.push_back((GLushort)(i + j*height));
-
 			//Set top left and right corner of cloth to fixed
 			if ((i == 0 && j == 0) || (j == width-1 && i == 0))
 				particles.back().setFixed(true);
+		}
+
+	//Indexing
+	for (int i = 0; i < height-1; i++)
+		for (int j = 0; j < width-1; j++)
+		{
+			particle_indices.push_back(j + i*width);
+			particle_indices.push_back(j+1 + i*width);
+			particle_indices.push_back(j+width + i*width);
+
+			particle_indices.push_back(j+width + i*width);
+			particle_indices.push_back(j+width+1 + i*width);
+			particle_indices.push_back(j+1 + i*width);
+		}
+
+	updateNormals();
+}
+
+void Cloth::updateNormals()
+{
+	normals.clear();
+
+	for (int i = 0; i < height-1; i++)
+		for (int j = 0; j < width-1; j++)
+		{
+			glm::vec3 upper = particle_vertices[j+1 + i*width] - particle_vertices[j + i*width];
+			glm::vec3 diagonal = particle_vertices[j+width + i*width] - particle_vertices[j+1 + i*width];
+			glm::vec3 lower = particle_vertices[j+width+1 + i*width] - particle_vertices[j+width + i*width];
+			
+			normals.push_back(glm::normalize(glm::cross(upper, diagonal)));
+			normals.push_back(glm::normalize(glm::cross(upper, diagonal)));
+			normals.push_back(glm::normalize(glm::cross(upper, diagonal)));
+			normals.push_back(glm::normalize(glm::cross(diagonal, lower)));
+			normals.push_back(glm::normalize(glm::cross(diagonal, lower)));
+			normals.push_back(glm::normalize(glm::cross(diagonal, lower)));
 		}
 }
 

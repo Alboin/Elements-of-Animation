@@ -98,6 +98,6 @@ public:
 	}
 	float getRadius()
 	{
-		return r;
+		return r + 0.02;
 	}
 };

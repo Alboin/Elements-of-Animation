@@ -28,7 +28,7 @@ using namespace glm;
 int main(void)
 {
 	int fps = 60;
-	float dt = 1 / (float)fps; //simulation time-step
+	float dt = 1 / 70.0f;// (float)fps; //simulation time-step
 	int start_time = GetTickCount();
 	float passed_time = 0.0;
 	const int window_w = 1200;
@@ -42,6 +42,9 @@ int main(void)
 
 	//Create cloth
 	Cloth cloth(20, 30, 3, 2, -3.14*2/4);
+
+	//Create light
+	glm::vec3 lightsource = glm::vec3(10,10,10);
 
 
 	// Initialise GLFW
@@ -78,7 +81,7 @@ int main(void)
 	}
 
 	// Set background color
-	glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
+	glClearColor(0.5f, 0.5f, 0.5f, 0.0f);
 
 	// Set point size, points used for particle rendering
 	glPointSize(10);
@@ -101,6 +104,7 @@ int main(void)
 	GLuint ViewMatrixID = glGetUniformLocation(programID, "V");
 	GLuint ModelMatrixID = glGetUniformLocation(programID, "M");
 	GLuint TimeID = glGetUniformLocation(programID, "TIME");
+	GLuint LightSource = glGetUniformLocation(programID, "LightPosition_worldspace");
 
 	//-------------- Sphere buffers start ------------------------
 
@@ -180,6 +184,11 @@ int main(void)
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementbuffer3);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, cloth.particle_indices.size() * sizeof(GLushort), &cloth.particle_indices[0], GL_STATIC_DRAW);
 
+	GLuint normalbuffer3;
+	glGenBuffers(1, &normalbuffer3);
+	glBindBuffer(GL_ARRAY_BUFFER, normalbuffer3);
+	glBufferData(GL_ARRAY_BUFFER, cloth.normals.size() * sizeof(glm::vec3), &cloth.normals[0], GL_STATIC_DRAW);
+	
 	//-------------- Cloth buffers end -------------------------
 
 
@@ -228,6 +237,7 @@ int main(void)
 		// Send our transformation to the currently bound shader, 
 		// in the "MVP" uniform
 		glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP1[0][0]);
+		glUniformMatrix4fv(ViewMatrixID, 1, GL_FALSE, &ViewMatrix[0][0]);
 		glUniformMatrix4fv(ModelMatrixID, 1, GL_FALSE, &ModelMatrix1[0][0]);
 
 		// 1rst attribute buffer : vertices
@@ -340,13 +350,25 @@ int main(void)
 			0,                  // stride
 			(void*)0            // array buffer offset
 		);
+		
+		// 3rd attribute buffer : normals
+		glEnableVertexAttribArray(2);
+		glBindBuffer(GL_ARRAY_BUFFER, normalbuffer3);
+		glVertexAttribPointer(
+			2,                                // attribute
+			3,                                // size
+			GL_FLOAT,                         // type
+			GL_FALSE,                         // normalized?
+			0,                                // stride
+			(void*)0                          // array buffer offset
+		);
 
 		// Index buffer
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementbuffer3);
 
 		// Draw the triangles !
 		glDrawElements(
-			GL_POINTS,      // mode
+			GL_TRIANGLES,      // mode
 			cloth.particle_indices.size(),    // count
 			GL_UNSIGNED_SHORT,   // type
 			(void*)0           // element array buffer offset
@@ -365,13 +387,16 @@ int main(void)
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 
-		std::this_thread::sleep_for(std::chrono::milliseconds(1000 / fps));
+		//std::this_thread::sleep_for(std::chrono::milliseconds(1000 / fps));
 
 		//Pass time variable to uniform variable in fragmentshader
 		glUniform1f(TimeID, passed_time);
 		passed_time = (GetTickCount() - start_time) * 0.001f;
 
-		
+		//Update cloth normals
+		cloth.updateNormals();
+		glUniform3fv(LightSource, 1, &lightsource[0]);
+
 		//Calculate spring forces on cloth
 		cloth.calcSpringForces();
 
