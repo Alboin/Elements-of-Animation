@@ -3,14 +3,18 @@
 
 #include <vector>
 #include <GL/glew.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 using namespace std;
+using namespace glm;
 
 class Plane
 {
 	public:
-		Plane(int n_segments, float segment_size);
-		void addObstacle(int coordx, int coordy);
+		Plane(int n_segments, float segment_size, float pos_x = 0, float pos_y = 0);
+		void makeObstacle();
+		bool isObstacle();
 		void createVertices();
 		void createVAO();
 		void draw(GLuint shaderProgramID);
@@ -19,10 +23,14 @@ class Plane
 	private:
 		int n_seg;
 		float seg_size;
-		GLuint plane_vao;
-		vector<GLfloat> vertices;
+		float posX;
+		float posZ;
+
+		bool obstacle;
+
+		GLuint VBO, VAO, EBO;
+		vector<vec3> vertices;
 		vector<GLuint> indices;
-		vector<pair <int,int> > obstacles;
 };
 
 #endif

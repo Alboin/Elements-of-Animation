@@ -1,7 +1,10 @@
 ﻿  main.cpp
 c:\program files (x86)\windows kits\8.1\include\shared\minwindef.h(130): warning C4005: 'APIENTRY': macro redefinition
   c:\users\albin\documents\github\elements-of-animation\deps\include\glfw\glfw3.h(98): note: see previous definition of 'APIENTRY'
-c:\users\albin\documents\github\elements-of-animation\ea_pathfinding\ea_pathfinding\main.cpp(136): warning C4244: 'argument': conversion from 'float' to 'DWORD', possible loss of data
-c:\users\albin\documents\github\elements-of-animation\ea_pathfinding\ea_pathfinding\main.cpp(197): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+c:\users\albin\documents\github\elements-of-animation\ea_pathfinding\ea_pathfinding\main.cpp(94): warning C4305: 'initializing': truncation from 'double' to 'float'
+c:\users\albin\documents\github\elements-of-animation\ea_pathfinding\ea_pathfinding\main.cpp(121): warning C4018: '<': signed/unsigned mismatch
+c:\users\albin\documents\github\elements-of-animation\ea_pathfinding\ea_pathfinding\main.cpp(122): warning C4018: '<': signed/unsigned mismatch
+c:\users\albin\documents\github\elements-of-animation\ea_pathfinding\ea_pathfinding\main.cpp(144): warning C4244: 'argument': conversion from 'float' to 'DWORD', possible loss of data
+c:\users\albin\documents\github\elements-of-animation\ea_pathfinding\ea_pathfinding\main.cpp(205): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
   EA_Pathfinding.vcxproj -> C:\Users\Albin\Documents\GitHub\Elements-of-Animation\EA_Pathfinding\Debug\EA_Pathfinding.exe
   EA_Pathfinding.vcxproj -> C:\Users\Albin\Documents\GitHub\Elements-of-Animation\EA_Pathfinding\Debug\EA_Pathfinding.pdb (Partial PDB)

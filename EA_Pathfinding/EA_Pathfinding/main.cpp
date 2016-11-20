@@ -14,7 +14,6 @@
 #include <windows.h>
 
 #include "shaderLoader.h"
-#include "Box.h"
 #include "Plane.h"
 
 
@@ -39,7 +38,7 @@ int main()
 	int windowHeight = 600;
 	int fps = 60;
 	//Starting position of camera
-	view = lookAt(vec3(1, 1, 1), vec3(0, 0, 0), vec3(0, 1, 0));
+	view = lookAt(vec3(0, 1, 1), vec3(0, 0, 0), vec3(0, 1, 0));
 
 	//INITIATE STUFF ======================================================
 
@@ -90,9 +89,19 @@ int main()
 
 	//END OF INITIATION ====================================================
 
+	//Create Area out of planes
+	const int segments = 30;
+	const float plate_size = 0.05;
+	vector< vector <Plane> > Area;
+	Area.resize(segments);
+	for (int i = 0; i < segments; i++)
+		for (int j = 0; j < segments; j++)
+		{
+			Area[i].push_back(Plane(1, plate_size, plate_size/2+j*plate_size-(float)segments*plate_size /2, (float)segments*plate_size/2-plate_size/2-i*plate_size));// , ((float)j)*plate_size, ((float)i)*plate_size));
+			if (rand() % 2 < 1)
+				Area[i][j].makeObstacle();
+		}
 
-
-	Plane plane1 = Plane(20, 0.1f);
 
 
 	//Run the application until the user closes the window
@@ -107,18 +116,17 @@ int main()
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-		plane1.draw(shaderProgramID);
+		for (int i = 0; i < Area.size(); i++)
+			for (int j = 0; j < Area[0].size(); j++)
+				Area[i][j].draw(shaderProgramID);
 
 
 		//Create tranformation matrix
-		glm::mat4 trans;
-		trans = glm::translate(trans, glm::vec3(0.0f, 0.0f, 0.0f));
 		//trans = glm::rotate(trans, (GLfloat)glfwGetTime() * 1.0f, glm::vec3(0.0f, 0.0f, 1.0f));
 
 		glm::mat4 model;
-		model = glm::rotate(model, 0.0f, glm::vec3(1.0f, 0.0f, 0.0f));
 		model = mat4(1.0);
 
 		glm::mat4 projection;

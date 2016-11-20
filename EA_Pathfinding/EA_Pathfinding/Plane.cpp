@@ -1,17 +1,27 @@
 #include "Plane.h"
 
 #include <iostream>
+#include <GL/glew.h>
 
-Plane::Plane(int n_segments, float segment_size)
-	: n_seg(n_segments), seg_size(segment_size)
+Plane::Plane(int n_segments, float segment_size, float pos_x, float pos_z)
+	: n_seg(n_segments), seg_size(segment_size), posX(pos_x), posZ(pos_z)
 {
+	obstacle = false;
 	createVAO();
 }
 
-void Plane::addObstacle(int coordx, int coordy)
+void Plane::makeObstacle()
 {
-	obstacles.push_back(make_pair(coordx, coordy));
+	obstacle = true;
+	for (int i = 1; i < vertices.size(); i+=2)
+	{
+		vertices[i] = vec3(0.0f, 0.25f, 0.25f);
+	}
+}
 
+bool Plane::isObstacle()
+{
+	return obstacle;
 }
 
 void Plane::createVertices()
@@ -21,13 +31,11 @@ void Plane::createVertices()
 		for (int j = 0; j < n_seg+1; j++)
 		{
 			//Vertex position
-			vertices.push_back(j*seg_size - (float)(n_seg*seg_size) / 2);
-			vertices.push_back(0.0f);
-			vertices.push_back((float)(n_seg*seg_size) / 2 - i*seg_size);
+			vec4 temp = vec4(j*seg_size - (float)(n_seg*seg_size) / 2, 0.0f, (float)(n_seg*seg_size) / 2 - i*seg_size, 1.0f);
+			temp = translate(mat4(1.0), vec3(posX, 0.0f, posZ)) * temp;
+			vertices.push_back(vec3(temp));
 			//Vertex color
-			vertices.push_back(1.0f * ((float)i)/(float)n_seg * ((float)j)/(float)n_seg);
-			vertices.push_back(0.5f);
-			vertices.push_back(0.0f);
+			vertices.push_back(vec3(1.0f, 0.5f, 0.0f));
 		}
 
 	//Indexing
@@ -46,9 +54,9 @@ void Plane::createVertices()
 
 void Plane::createVAO()
 {
-	createVertices();
+	if(vertices.size() == 0)
+		createVertices();
 
-	GLuint VBO, VAO, EBO;
 	glGenVertexArrays(1, &VAO);
 	glGenBuffers(1, &VBO);
 	glGenBuffers(1, &EBO);
@@ -56,7 +64,7 @@ void Plane::createVAO()
 	glBindVertexArray(VAO);
 
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*vertices.size(), &vertices[0] , GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, vertices.size()*sizeof(vec3), &vertices[0] , GL_STATIC_DRAW);
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint)*indices.size(), &indices[0], GL_STATIC_DRAW);
@@ -72,20 +80,19 @@ void Plane::createVAO()
 
 	glBindVertexArray(0); // Unbind VAO (it's always a good thing to unbind any buffer/array to prevent strange bugs), remember: do NOT unbind the EBO, keep it bound to this VAO
 
-	plane_vao = VAO;
 }
 
 GLuint Plane::getVAO()
 {
-	return plane_vao;
+	return VAO;
 }
 
 void Plane::draw(GLuint shaderProgramID)
 {
-	// Draw our first triangle
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(vec3), &vertices[0], GL_STATIC_DRAW);
 	glUseProgram(shaderProgramID);
-	glBindVertexArray(plane_vao);
-	//glDrawArrays(GL_TRIANGLES, 0, 6);
+	glBindVertexArray(VAO);
 	glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
 	glBindVertexArray(0);
 
