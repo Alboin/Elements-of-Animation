@@ -10,11 +10,13 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <cal3d/cal3d.h>
 
 #include <windows.h>
 
 #include "shaderLoader.h"
 #include "Plane.h"
+#include "Particle.h"
 
 
 using namespace glm;
@@ -102,8 +104,10 @@ int main()
 				Area[i][j].makeObstacle();
 		}
 
+	Particle hej = Particle(0, 0.5f, 0);
 
-
+	//CalCoreModel myCoreModel = CalCoreModel("dummy");
+	
 	//Run the application until the user closes the window
 	while (!glfwWindowShouldClose(window))
 	{
@@ -122,9 +126,8 @@ int main()
 			for (int j = 0; j < Area[0].size(); j++)
 				Area[i][j].draw(shaderProgramID);
 
-
-		//Create tranformation matrix
-		//trans = glm::rotate(trans, (GLfloat)glfwGetTime() * 1.0f, glm::vec3(0.0f, 0.0f, 1.0f));
+		glPointSize(20);
+		hej.draw(shaderProgramID);
 
 		glm::mat4 model;
 		model = mat4(1.0);
@@ -178,6 +181,7 @@ static void cursor_position_callback(GLFWwindow* window, double xpos, double ypo
 		
 		if (camera_pos.y < 0.1)
 		{
+
 			if (ypos - mouseY > 0)
 			{
 				camera_pos = vec3(camera_pos.x, 0.0f, camera_pos.z);
