@@ -35,11 +35,12 @@ double mouseX, mouseY;
 
 int main()
 {
-	int windowWidth = 800;
-	int windowHeight = 600;
+	int windowWidth = 1200;
+	int windowHeight = 800;
 	int fps = 60;
 	//Starting position of camera
-	view = lookAt(vec3(1, 1, 1), vec3(0, 0, 0), vec3(0, 1, 0));
+	view = lookAt(vec3(0, 2, 2), vec3(0, 0, 0), vec3(0, 1, 0));
+	vec3 lightPos(1.2f, 1.0f, 2.0f);
 
 	//INITIATE STUFF ======================================================
 
@@ -79,6 +80,10 @@ int main()
 	// Create and compile our GLSL program from the shaders
 	GLuint shaderProgramID = LoadShaders("vertexshader.glsl", "fragmentshader.glsl");
 
+	// Set lightpos uniform
+	GLint lightPosLoc = glGetUniformLocation(shaderProgramID, "lightPos");
+	glUniform3f(lightPosLoc, lightPos.x, lightPos.y, lightPos.z);
+
 	//Register external intpu in GLFW
 	glfwSetKeyCallback(window, key_callback);
 	glfwSetCursorPosCallback(window, cursor_position_callback);
@@ -86,6 +91,7 @@ int main()
 	glfwSetScrollCallback(window, scroll_callback);
 	//Save the initial cursor position
 	glfwGetCursorPos(window, &mouseX, &mouseY);
+
 
 
 	//END OF INITIATION ====================================================
@@ -107,18 +113,25 @@ int main()
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
+		plane1.updateNormals();
 		plane1.draw(shaderProgramID);
-
 
 		//Create tranformation matrix
 		glm::mat4 trans;
 		trans = glm::translate(trans, glm::vec3(0.0f, 0.0f, 0.0f));
 		//trans = glm::rotate(trans, (GLfloat)glfwGetTime() * 1.0f, glm::vec3(0.0f, 0.0f, 1.0f));
 
+		for (int i = 0; i < plane1.vertices.size(); i+=3)
+		{
+			plane1.vertices[i].y = 0.2*sin(((GLfloat)glfwGetTime() + plane1.vertices[i].x + plane1.vertices[i].z)*3);
+			//plane1.vertices[i].y = sin((GLfloat)glfwGetTime() *plane1.vertices[i].z/2* plane1.vertices[i].x)*0.2f;
+			plane1.vertices[i + 2].x = 5*plane1.vertices[i].y;
+		}
+
 		glm::mat4 model;
-		model = glm::rotate(model, 0.0f, glm::vec3(1.0f, 0.0f, 0.0f));
+		model = glm::rotate(model, 90.0f, glm::vec3(1.0f, 0.0f, 0.0f));
 		model = mat4(1.0);
 
 		glm::mat4 projection;
@@ -129,6 +142,15 @@ int main()
 		//Send the transformation matrix to the vertex shader
 		GLuint transformLoc = glGetUniformLocation(shaderProgramID, "MVP");
 		glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(MVP));
+		GLuint modeltransLoc = glGetUniformLocation(shaderProgramID, "model");
+		glUniformMatrix4fv(modeltransLoc, 1, GL_FALSE, glm::value_ptr(model));
+
+		//Set light color uniform
+		GLint lightColorLoc = glGetUniformLocation(shaderProgramID, "lightColor");
+		glUniform3f(lightColorLoc, 1.0f, 1.0f, 1.0f); // Set light's color (white)
+
+
+
 
 		//Swap the buffers
 		glfwSwapBuffers(window);
