@@ -32,15 +32,16 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 mat4 view;
 bool leftMousePressed = false;
 double mouseX, mouseY;
+bool wireframe = false;
 
 int main()
 {
 	int windowWidth = 1200;
 	int windowHeight = 800;
-	int fps = 60;
+	int fps = 10000;
 	//Starting position of camera
-	view = lookAt(vec3(0, 2, 2), vec3(0, 0, 0), vec3(0, 1, 0));
-	vec3 lightPos(1.2f, 1.0f, 2.0f);
+	view = lookAt(vec3(0.6f, 1.5f, -2), vec3(0, 0, 0), vec3(0, 1, 0));
+	vec3 lightPos(0.0f, 0.7f, 2.5f);
 
 	//INITIATE STUFF ======================================================
 
@@ -80,9 +81,6 @@ int main()
 	// Create and compile our GLSL program from the shaders
 	GLuint shaderProgramID = LoadShaders("vertexshader.glsl", "fragmentshader.glsl");
 
-	// Set lightpos uniform
-	GLint lightPosLoc = glGetUniformLocation(shaderProgramID, "lightPos");
-	glUniform3f(lightPosLoc, lightPos.x, lightPos.y, lightPos.z);
 
 	//Register external intpu in GLFW
 	glfwSetKeyCallback(window, key_callback);
@@ -96,10 +94,13 @@ int main()
 
 	//END OF INITIATION ====================================================
 
+	int n_segments = 1000;
+	float segment_size = 0.1f;//2.0f / n_segments;
+	Plane plane1 = Plane(n_segments, segment_size);
 
-
-	Plane plane1 = Plane(20, 0.1f);
-
+	vector<float> randomness;
+	for (int i = 0; i < plane1.vertices.size() / 3; i++)
+		randomness.push_back((float)(rand() % 5) / 300.0f);
 
 	//Run the application until the user closes the window
 	while (!glfwWindowShouldClose(window))
@@ -110,12 +111,14 @@ int main()
 		glfwGetCursorPos(window, &mouseX, &mouseY);
 
 		//Rendering commands here
-		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		if (wireframe)
+			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		else
+			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-		plane1.updateNormals();
 		plane1.draw(shaderProgramID);
 
 		//Create tranformation matrix
@@ -123,12 +126,15 @@ int main()
 		trans = glm::translate(trans, glm::vec3(0.0f, 0.0f, 0.0f));
 		//trans = glm::rotate(trans, (GLfloat)glfwGetTime() * 1.0f, glm::vec3(0.0f, 0.0f, 1.0f));
 
-		for (int i = 0; i < plane1.vertices.size(); i+=3)
+		/*for (int i = 0; i < plane1.vertices.size(); i+=3)
 		{
-			plane1.vertices[i].y = 0.2*sin(((GLfloat)glfwGetTime() + plane1.vertices[i].x + plane1.vertices[i].z)*3);
-			//plane1.vertices[i].y = sin((GLfloat)glfwGetTime() *plane1.vertices[i].z/2* plane1.vertices[i].x)*0.2f;
-			plane1.vertices[i + 2].x = 5*plane1.vertices[i].y;
-		}
+			float temp = 0.1*sin(((GLfloat)glfwGetTime() + plane1.vertices[i].x + plane1.vertices[i].z) * 3);
+			temp += 0.1*sin((GLfloat)glfwGetTime()*1.3f + plane1.vertices[i].x * 3);
+			temp += 0.1*sin((GLfloat)glfwGetTime()*1.6f + plane1.vertices[i].y * 4);
+			temp /= 2;
+			temp += randomness[i/3];
+			plane1.vertices[i].y = temp;
+		}*/
 
 		glm::mat4 model;
 		model = glm::rotate(model, 90.0f, glm::vec3(1.0f, 0.0f, 0.0f));
@@ -145,10 +151,21 @@ int main()
 		GLuint modeltransLoc = glGetUniformLocation(shaderProgramID, "model");
 		glUniformMatrix4fv(modeltransLoc, 1, GL_FALSE, glm::value_ptr(model));
 
+		//UNIFORMS
+		//Set lightpos uniform
+		GLint lightPosLoc = glGetUniformLocation(shaderProgramID, "lightPos");
+		glUniform3f(lightPosLoc, lightPos.x, lightPos.y, lightPos.z);
 		//Set light color uniform
 		GLint lightColorLoc = glGetUniformLocation(shaderProgramID, "lightColor");
 		glUniform3f(lightColorLoc, 1.0f, 1.0f, 1.0f); // Set light's color (white)
-
+		//Set camera position uniform
+		GLint viewPosLoc = glGetUniformLocation(shaderProgramID, "viewPos");
+		mat3 rotMat(view);
+		vec3 transl(view[3]);
+		vec3 camera_pos = -transl * rotMat;
+		glUniform3f(viewPosLoc, camera_pos.x, camera_pos.y, camera_pos.z);
+		GLint shaderTimeLoc = glGetUniformLocation(shaderProgramID, "glfw_time");
+		glUniform1f(shaderTimeLoc, (float)glfwGetTime());
 
 
 
@@ -176,6 +193,12 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 	// closing the application
 	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, GL_TRUE);
+
+	if (key == GLFW_KEY_W && action == GLFW_PRESS)
+		if (wireframe)
+			wireframe = false;
+		else
+			wireframe = true;
 }
 
 static void cursor_position_callback(GLFWwindow* window, double xpos, double ypos)

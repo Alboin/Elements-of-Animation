@@ -19,7 +19,9 @@ void Plane::createVertices()
 			//Vertex normal
 			vertices.push_back(vec3(0, 1, 0));
 			//Vertex color
-			vertices.push_back(vec3(1.0f * ((float)i)/(float)n_seg * ((float)j)/(float)n_seg, 0.5f, 0.0f));
+			//vertices.push_back(vec3(1.0f * ((float)i)/(float)n_seg * ((float)j)/(float)n_seg, 0.5f, 0.0f));
+			//vertices.push_back(vec3(0.9, 0.7, 0.3)); //golden
+			vertices.push_back(vec3(0.1f, 0.3f, 0.7f)); //blue
 		}
 
 	//Indexing
