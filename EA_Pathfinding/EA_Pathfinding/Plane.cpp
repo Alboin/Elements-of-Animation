@@ -2,10 +2,17 @@
 
 #include <iostream>
 
-Plane::Plane(int n_segments, float segment_size)
-	: n_seg(n_segments), seg_size(segment_size)
+Plane::Plane(int n_segments, float segment_size, float damping)
+	: n_seg(n_segments), seg_size(segment_size), damp(damping)
 {
+	for (int i = 0; i < (n_seg+1)*(n_seg+1); i++)
+	{
+		v.push_back(0.0f);
+		u.push_back(0.0f);
+	}
 	createVAO();
+	resetSimulation();
+
 }
 
 void Plane::createVertices()
@@ -18,7 +25,7 @@ void Plane::createVertices()
 			vertices.push_back(vec3(j*seg_size - (float)(n_seg*seg_size) / 2, 0.0f, (float)(n_seg*seg_size) / 2 - i*seg_size));
 			//Vertex normal
 			vertices.push_back(vec3(0, 1, 0));
-			//Vertex color
+			//Vertex color			
 			//vertices.push_back(vec3(1.0f * ((float)i)/(float)n_seg * ((float)j)/(float)n_seg, 0.5f, 0.0f));
 			//vertices.push_back(vec3(0.9, 0.7, 0.3)); //golden
 			vertices.push_back(vec3(0.1f, 0.3f, 0.7f)); //blue
@@ -100,4 +107,85 @@ void Plane::updateNormals()
 		vertices[indices[i + 1] * 3 + 1] = normalize(normal + vertices[indices[i + 1] * 3 + 1]);
 		vertices[indices[i + 2] * 3 + 1] = normalize(normal + vertices[indices[i + 2] * 3 + 1]);
 	}
+}
+
+void Plane::updateVertexPos(double timestep)
+{
+	int segs = n_seg + 1;
+	float h = seg_size;
+	double c = (seg_size / timestep)/2;
+	vector<float> forces;
+
+	for(int i = 0; i < segs; i++)
+		for (int j = 0; j < segs; j++)
+		{
+			float f = v[i*segs + j];
+
+				if (i - 1 >= 0)
+				f += (c*c) * u[(i - 1)*segs + j]/ (h*h);
+				else
+				f += (c*c) * u[i*segs + j]/(h*h);
+
+				if (i + 1 < segs)
+				f += (c*c) * u[(i + 1)*segs + j]/(h*h);
+				else
+				f += (c*c) * u[i*segs + j] / (h*h);
+
+				if (j - 1 >= 0)
+				f += (c*c) * u[i*segs + j - 1] / (h*h);
+				else
+				f += (c*c) * u[i*segs + j] / (h*h);
+
+				if (j + 1 < segs)
+				f += (c*c) * u[i*segs + j + 1] / (h*h);
+				else
+				f += (c*c) * u[i*segs + j] / (h*h);
+
+			f -= (c*c) * 4*u[i*segs + j] /(h*h);
+			//f *= 0.5; //does affect the simulation?
+			forces.push_back(f);
+		}
+
+	for (int i = 0; i < u.size(); i++)
+	{
+		v[i] += forces[i] * timestep;
+		v[i] *= damp; //instead of damping the forces
+		u[i] += v[i] * timestep;
+	}
+
+	for(int i = 0; i < segs; i++)
+		for (int j = 0; j < segs; j++)
+		{
+			vertices[3 * (i*segs + j)].y = u[i*segs + j];
+			//if(abs(u[i*segs + j]) > 1)
+			//cout << "hojd: " << u[i*segs + j] << endl;
+		}
+	cout << timestep << ", " << c << endl;
+
+}
+
+void Plane::resetSimulation()
+{
+	for (int i = 0; i < v.size(); i++)
+	{
+		v[i] = 0;
+		u[i] = 0;
+	}
+
+	for (int i = 0; i < n_seg+1; i++)
+		for (int j = 0; j < n_seg+1; j++)
+		{
+			vertices[3 * (i*(n_seg+1) + j)].y = u[i*(n_seg+1) + j];
+		}
+
+	//Create som initial waves
+	for (int i = 0; i < u.size(); i++)
+	{
+		if (i % (n_seg+1) < n_seg / 50)
+			u[i] = 1;
+
+	}
+
+	//u[((n_seg + 1) / 2)*(n_seg + 1) + (n_seg + 1) / 2] = 1.3;
+	u[u.size() - 1] = 5.5;
 }

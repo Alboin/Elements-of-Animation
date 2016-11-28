@@ -1,7 +1,10 @@
+#define _CRT_SECURE_NO_WARNINGS
+
 #include <iostream>
 #include <vector>
 #include <string>
 #include <math.h>
+#include <stdio.h>
 
 #define GLEW_STATIC
 #include <GL/glew.h>
@@ -32,16 +35,33 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 mat4 view;
 bool leftMousePressed = false;
 double mouseX, mouseY;
+double timestep = 0.001;
 bool wireframe = false;
+bool lock_fps = false;
+int procedural = 1;
+float procedural_scale_length = 0.5;
+float procedural_scale_height = 1;
+
+Plane * plane1;
+
+//Some global variables for the fps-counter
+double t0 = 0.0;
+int frames = 0;
+char titlestring[200];
 
 int main()
 {
 	int windowWidth = 1200;
 	int windowHeight = 800;
-	int fps = 10000;
+	int force_fps = 60;
 	//Starting position of camera
-	view = lookAt(vec3(0.6f, 1.5f, -2), vec3(0, 0, 0), vec3(0, 1, 0));
+	view = lookAt(vec3(1.2f, 3.0f, -4), vec3(0, 0, 0), vec3(0, 1, 0));
 	vec3 lightPos(0.0f, 0.7f, 2.5f);
+
+	//Plane properties
+	int n_segments = 200;
+	float segment_size = 0.1f;//2.0f / n_segments;
+	float damping = 0.995;
 
 	//INITIATE STUFF ======================================================
 
@@ -94,17 +114,16 @@ int main()
 
 	//END OF INITIATION ====================================================
 
-	int n_segments = 1000;
-	float segment_size = 0.1f;//2.0f / n_segments;
-	Plane plane1 = Plane(n_segments, segment_size);
+	plane1 = new Plane(n_segments, segment_size, damping);
 
 	vector<float> randomness;
-	for (int i = 0; i < plane1.vertices.size() / 3; i++)
+	for (int i = 0; i < plane1->vertices.size() / 3; i++)
 		randomness.push_back((float)(rand() % 5) / 300.0f);
 
 	//Run the application until the user closes the window
 	while (!glfwWindowShouldClose(window))
 	{
+
 		//Checks if any events are triggered (like keyboard or mouse events)
 		glfwPollEvents();
 		//Update mouse position
@@ -119,22 +138,17 @@ int main()
 		else
 			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-		plane1.draw(shaderProgramID);
+		if (!procedural)
+		{
+			plane1->updateVertexPos(timestep);
+			plane1->updateNormals();
+		}
+		plane1->draw(shaderProgramID);
 
 		//Create tranformation matrix
 		glm::mat4 trans;
 		trans = glm::translate(trans, glm::vec3(0.0f, 0.0f, 0.0f));
 		//trans = glm::rotate(trans, (GLfloat)glfwGetTime() * 1.0f, glm::vec3(0.0f, 0.0f, 1.0f));
-
-		/*for (int i = 0; i < plane1.vertices.size(); i+=3)
-		{
-			float temp = 0.1*sin(((GLfloat)glfwGetTime() + plane1.vertices[i].x + plane1.vertices[i].z) * 3);
-			temp += 0.1*sin((GLfloat)glfwGetTime()*1.3f + plane1.vertices[i].x * 3);
-			temp += 0.1*sin((GLfloat)glfwGetTime()*1.6f + plane1.vertices[i].y * 4);
-			temp /= 2;
-			temp += randomness[i/3];
-			plane1.vertices[i].y = temp;
-		}*/
 
 		glm::mat4 model;
 		model = glm::rotate(model, 90.0f, glm::vec3(1.0f, 0.0f, 0.0f));
@@ -166,15 +180,36 @@ int main()
 		glUniform3f(viewPosLoc, camera_pos.x, camera_pos.y, camera_pos.z);
 		GLint shaderTimeLoc = glGetUniformLocation(shaderProgramID, "glfw_time");
 		glUniform1f(shaderTimeLoc, (float)glfwGetTime());
-
+		GLint proceduralLoc = glGetUniformLocation(shaderProgramID, "procedural");
+		glUniform1i(proceduralLoc, procedural);
+		GLint proceduralScaleLengthLoc = glGetUniformLocation(shaderProgramID, "scale_length");
+		glUniform1f(proceduralScaleLengthLoc, procedural_scale_length);
+		GLint proceduralScaleHeightLoc = glGetUniformLocation(shaderProgramID, "scale_height");
+		glUniform1f(proceduralScaleHeightLoc, procedural_scale_height);
 
 
 		//Swap the buffers
 		glfwSwapBuffers(window);
 
-		Sleep(1000 / (float)fps);
+		if(lock_fps)
+			Sleep(1000 / (float)force_fps);
 
-
+		//Show fps in window title
+		// Get current time
+		double t = glfwGetTime();  // Gets number of seconds since glfwInit()
+		// If one second has passed, or if this is the very first frame
+		if ((t - t0) > 1.0 || frames == 0)
+		{
+			double fps = (double)frames / (t - t0);
+			if (lock_fps)
+				sprintf(titlestring, "Water simulation (%.1f FPS, locked fps)", fps);
+			else
+				sprintf(titlestring, "Water simulation (%.1f FPS, unlocked fps)", fps);
+			glfwSetWindowTitle(window, titlestring);
+			t0 = t;
+			frames = 0;
+		}
+		frames++;
 	}
 
 	// Properly de-allocate all resources once they've outlived their purpose
@@ -199,6 +234,31 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 			wireframe = false;
 		else
 			wireframe = true;
+
+	if (key == GLFW_KEY_P && action == GLFW_PRESS)
+		if (procedural == 0)
+		{
+			procedural = 1;
+			plane1->resetSimulation();
+		}
+		else
+		{
+			procedural = 0;
+		}
+	if (key == GLFW_KEY_F && action == GLFW_PRESS)
+		if (lock_fps)
+			lock_fps = false;
+		else
+			lock_fps = true;
+
+	if (key == GLFW_KEY_LEFT && action == GLFW_PRESS)
+		procedural_scale_length /= 1.1;
+	if (key == GLFW_KEY_RIGHT && action == GLFW_PRESS)
+		procedural_scale_length *= 1.1;
+	if (key == GLFW_KEY_DOWN && action == GLFW_PRESS)
+		procedural_scale_height /= 1.1;
+	if (key == GLFW_KEY_UP && action == GLFW_PRESS)
+		procedural_scale_height *= 1.1;
 }
 
 static void cursor_position_callback(GLFWwindow* window, double xpos, double ypos)
@@ -212,33 +272,16 @@ static void cursor_position_callback(GLFWwindow* window, double xpos, double ypo
 		mat3 rotMat(view);
 		vec3 transl(view[3]);
 		vec3 camera_pos = -transl * rotMat;
-		
-		if (camera_pos.y < 0.1)
-		{
-			if (ypos - mouseY > 0)
-			{
-				camera_pos = vec3(camera_pos.x, 0.0f, camera_pos.z);
-				vec3 temp = normalize(cross(vec3(0.0f, 1.0f, 0.0f), camera_pos));
-				view = rotate(view, (float)(ypos - mouseY) / 150, temp);
-			}
-		}
-		else if (sqrt(camera_pos.x * camera_pos.x + camera_pos.z * camera_pos.z) > 0.5f)
-		{
-			camera_pos = vec3(camera_pos.x, 0.0f, camera_pos.z);
-			vec3 temp = normalize(cross(vec3(0.0f, 1.0f, 0.0f), camera_pos));
-			view = rotate(view, (float)(ypos - mouseY) / 100, temp);
-		}
-		else if (ypos - mouseY < 0)
-		{
-			camera_pos = vec3(camera_pos.x, 0.0f, camera_pos.z);
-			vec3 temp = normalize(cross(vec3(0.0f, 1.0f, 0.0f), camera_pos));
-			view = rotate(view, (float)(ypos - mouseY) / 100, temp);
-		}
+
+		camera_pos = vec3(camera_pos.x, 0.0f, camera_pos.z);
+		vec3 temp = normalize(cross(vec3(0.0f, 1.0f, 0.0f), camera_pos));
+		view = rotate(view, (float)(ypos - mouseY) / 150, temp);
 	}
 }
 
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
+	//Zoom in and out through scrolling
 	view = scale(view, vec3(1.0 + 0.1*yoffset));
 }
 
@@ -248,4 +291,9 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 		leftMousePressed = true;
 	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE)
 		leftMousePressed = false;
+}
+
+void showFPS() {
+
+
 }

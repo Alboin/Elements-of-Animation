@@ -9,22 +9,25 @@ uniform vec3 lightColor;
 uniform vec3 lightPos;
 uniform vec3 viewPos;
 uniform float glfw_time;
+uniform int procedural;
+uniform float scale_length;
+uniform float scale_height;
 
 out vec4 color;
 
 vec3 calc_normal()
 {
 	float step = 0.1;		
-	float temp = 0.1*sin((glfw_time + (vertex_pos.x + step) + vertex_pos.z) * 3);
-	temp += 0.1*sin(glfw_time*1.3f + (vertex_pos.x + step) * 3);
-	temp += 0.1*sin(glfw_time*1.6f + vertex_pos.y * 4);
+	float temp = scale_height*0.1*sin((glfw_time + (vertex_pos.x + step) + vertex_pos.z) * 3 * scale_length);
+	temp += scale_height*0.1*sin(glfw_time*1.3f + (vertex_pos.x + step) * 3 * scale_length);
+	temp += scale_height*0.1*sin(glfw_time*1.6f + vertex_pos.y * 4 * scale_length);
 	temp /= 2;
 
 	vec3 B = vec3((vertex_pos.x + step), temp, vertex_pos.z);
 	
-	temp = 0.1*sin((glfw_time + vertex_pos.x + (vertex_pos.z + step)) * 3);
-	temp += 0.1*sin(glfw_time*1.3f + vertex_pos.x * 3);
-	temp += 0.1*sin(glfw_time*1.6f + vertex_pos.y * 4);
+	temp = scale_height*0.1*sin((glfw_time + vertex_pos.x + (vertex_pos.z + step)) * 3 * scale_length);
+	temp += scale_height*0.1*sin(glfw_time*1.3f + vertex_pos.x * 3 * scale_length);
+	temp += scale_height*0.1*sin(glfw_time*1.6f + vertex_pos.y * 4 * scale_length);
 	temp /= 2;
 
 	vec3 C = vec3(vertex_pos.x, temp, (vertex_pos.z + step));
@@ -34,7 +37,11 @@ vec3 calc_normal()
 
 void main()
 {
-	vec3 norm = calc_normal();//normal_to_frag;
+	vec3 norm = normal_to_frag;
+	if(procedural == 1)
+	{
+		norm = calc_normal();
+	}
 
 	vec3 lightDir = normalize(lightPos - fragPos);
 
