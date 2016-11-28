@@ -17,6 +17,8 @@
 #include "shaderLoader.h"
 #include "Plane.h"
 #include "Particle.h"
+#include "global.h"
+#include "Model.h"
 
 
 using namespace glm;
@@ -33,6 +35,7 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 mat4 view;
 bool leftMousePressed = false;
 double mouseX, mouseY;
+bool wireframe = false;
 
 int main()
 {
@@ -106,7 +109,13 @@ int main()
 
 	Particle hej = Particle(0, 0.5f, 0);
 
-	//CalCoreModel myCoreModel = CalCoreModel("dummy");
+	Model *pModel;
+	pModel = new Model();
+	//pModel->setPath("C:/Users/Albin/Documents/GitHub/Elements-of-Animation/EA_Pathfinding/data/skeleton/");
+	//pModel->onInit("C:/Users/Albin/Documents/GitHub/Elements-of-Animation/EA_Pathfinding/data/skeleton.cfg");
+
+	//CalCoreModel * myCoreModel = new CalCoreModel("cally");
+
 	
 	//Run the application until the user closes the window
 	while (!glfwWindowShouldClose(window))
@@ -119,8 +128,6 @@ int main()
 		//Rendering commands here
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-		//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 		for (int i = 0; i < Area.size(); i++)
 			for (int j = 0; j < Area[0].size(); j++)
@@ -155,9 +162,10 @@ int main()
 	//glDeleteBuffers(1, &EBO);
 	//Clean/delete all resources that we allocated
 	glfwTerminate();
-
+	//delete myCoreModel;
 	return 0;
 }
+
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode)
 {
@@ -165,6 +173,18 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 	// closing the application
 	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, GL_TRUE);
+
+	if (key == GLFW_KEY_W && action == GLFW_PRESS && !wireframe)
+	{
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		wireframe = true;
+	}
+	else if(key == GLFW_KEY_W && action == GLFW_PRESS && wireframe)
+	{
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		wireframe = false;
+	}
+
 }
 
 static void cursor_position_callback(GLFWwindow* window, double xpos, double ypos)
