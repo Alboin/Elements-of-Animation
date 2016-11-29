@@ -11,13 +11,14 @@ using namespace std;
 class Plane
 {
 	public:
-		Plane(int n_segments, float segment_size, float damping);
+		Plane(int n_segments, float segment_size);
 		void createVertices();
 		void createVAO();
 		void draw(GLuint shaderProgramID);
 		void updateNormals();
-		void updateVertexPos(double timestep);
-		void resetSimulation();
+		void updateVertexPos(double timestep, double wavespeed_factor, double damp);
+		void resetSimulation(float amplitude);
+		void changeColor();
 
 		vector<vec3> vertices;
 		vector<float> u;
@@ -27,6 +28,7 @@ class Plane
 		int n_seg;
 		float seg_size;
 		float damp;
+		int color = 0;
 
 		GLuint VBO, VAO, EBO;
 

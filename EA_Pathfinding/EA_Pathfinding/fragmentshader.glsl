@@ -12,22 +12,23 @@ uniform float glfw_time;
 uniform int procedural;
 uniform float scale_length;
 uniform float scale_height;
+uniform int enable_fog;
 
 out vec4 color;
 
 vec3 calc_normal()
 {
-	float step = 0.1;		
+	float step = 0.5;		
 	float temp = scale_height*0.1*sin((glfw_time + (vertex_pos.x + step) + vertex_pos.z) * 3 * scale_length);
 	temp += scale_height*0.1*sin(glfw_time*1.3f + (vertex_pos.x + step) * 3 * scale_length);
-	temp += scale_height*0.1*sin(glfw_time*1.6f + vertex_pos.y * 4 * scale_length);
+	temp += scale_height*0.01*sin(glfw_time*1.6f +  4 * scale_length);
 	temp /= 2;
 
 	vec3 B = vec3((vertex_pos.x + step), temp, vertex_pos.z);
 	
 	temp = scale_height*0.1*sin((glfw_time + vertex_pos.x + (vertex_pos.z + step)) * 3 * scale_length);
 	temp += scale_height*0.1*sin(glfw_time*1.3f + vertex_pos.x * 3 * scale_length);
-	temp += scale_height*0.1*sin(glfw_time*1.6f + vertex_pos.y * 4 * scale_length);
+	temp += scale_height*0.01*sin(glfw_time*1.6f +  4 * scale_length);
 	temp /= 2;
 
 	vec3 C = vec3(vertex_pos.x, temp, (vertex_pos.z + step));
@@ -42,12 +43,16 @@ void main()
 	{
 		norm = calc_normal();
 	}
+	else if(procedural == 2)
+	{
+		norm = normalize(normal_to_frag + calc_normal());
+	}
 
 	vec3 lightDir = normalize(lightPos - fragPos);
 
 	//Compute diffuse component
 	float diff = max(dot(norm, lightDir), 0.0);
-	vec3 diffuse = diff * lightColor;
+	vec3 diffuse = diff * lightColor * (vertex_pos.y + 1)*(vertex_pos.y + 1);
 
 	//Compute ambient component
 	float ambientStrength = 0.15f;
@@ -63,7 +68,21 @@ void main()
 
 	vec3 result = (ambient + diffuse + specular) * vertexColor;
 
+	if(enable_fog == 1)
+	{
+		float dist = distance(viewPos, fragPos);
+		float fog_start = 5.0;
+		float fog_end = 8.3;
+		if(dist > fog_start)
+		{
+			result = result * (fog_end - dist)/(fog_end - fog_start) + vec3(0.7,0.7,0.7) * (dist - fog_start)/(fog_end - fog_start);
+		}
+		if(dist > fog_end)
+		{
+			result = vec3(0.7,0.7,0.7);
+		}
+	}
+
+
     color = vec4(result, 1.0f);
-    
-	//color = vec4(vertexColor, 1.0);
 } 

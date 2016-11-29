@@ -2,8 +2,8 @@
 
 #include <iostream>
 
-Plane::Plane(int n_segments, float segment_size, float damping)
-	: n_seg(n_segments), seg_size(segment_size), damp(damping)
+Plane::Plane(int n_segments, float segment_size)
+	: n_seg(n_segments), seg_size(segment_size)
 {
 	for (int i = 0; i < (n_seg+1)*(n_seg+1); i++)
 	{
@@ -11,7 +11,7 @@ Plane::Plane(int n_segments, float segment_size, float damping)
 		u.push_back(0.0f);
 	}
 	createVAO();
-	resetSimulation();
+	resetSimulation(5.0);
 
 }
 
@@ -26,9 +26,7 @@ void Plane::createVertices()
 			//Vertex normal
 			vertices.push_back(vec3(0, 1, 0));
 			//Vertex color			
-			//vertices.push_back(vec3(1.0f * ((float)i)/(float)n_seg * ((float)j)/(float)n_seg, 0.5f, 0.0f));
-			//vertices.push_back(vec3(0.9, 0.7, 0.3)); //golden
-			vertices.push_back(vec3(0.1f, 0.3f, 0.7f)); //blue
+			vertices.push_back(vec3(0.1f, 0.3f, 0.6f)); //blue
 		}
 
 	//Indexing
@@ -109,11 +107,11 @@ void Plane::updateNormals()
 	}
 }
 
-void Plane::updateVertexPos(double timestep)
+void Plane::updateVertexPos(double timestep, double wavespeed_factor, double damp)
 {
 	int segs = n_seg + 1;
 	float h = seg_size;
-	double c = (seg_size / timestep)/2;
+	double c = (seg_size / timestep)/wavespeed_factor;
 	vector<float> forces;
 
 	for(int i = 0; i < segs; i++)
@@ -157,14 +155,11 @@ void Plane::updateVertexPos(double timestep)
 		for (int j = 0; j < segs; j++)
 		{
 			vertices[3 * (i*segs + j)].y = u[i*segs + j];
-			//if(abs(u[i*segs + j]) > 1)
-			//cout << "hojd: " << u[i*segs + j] << endl;
 		}
-	cout << timestep << ", " << c << endl;
 
 }
 
-void Plane::resetSimulation()
+void Plane::resetSimulation(float amplitude)
 {
 	for (int i = 0; i < v.size(); i++)
 	{
@@ -182,10 +177,53 @@ void Plane::resetSimulation()
 	for (int i = 0; i < u.size(); i++)
 	{
 		if (i % (n_seg+1) < n_seg / 50)
-			u[i] = 1;
+			u[i] = amplitude / 5.0;
 
 	}
+	u[((n_seg + 1) / 2)*(n_seg + 1) + (n_seg + 1) / 2] = amplitude;
+	u[u.size() - 1] = amplitude;
+}
 
-	//u[((n_seg + 1) / 2)*(n_seg + 1) + (n_seg + 1) / 2] = 1.3;
-	u[u.size() - 1] = 5.5;
+void Plane::changeColor()
+{
+	if (color == 0)
+	{
+		//Golden
+		for (int i = 0; i < vertices.size(); i += 3)
+			vertices[i + 2] = vec3(0.9, 0.7, 0.3);
+		color++;
+	}
+	/*else if (color == 2)
+	{
+		//Random
+		for (int i = 0; i < vertices.size(); i += 3)
+		{
+			float r1 = (float)(rand() % 255) / 255.0;
+			float r2 = (float)(rand() % 255) / 255.0;
+			float r3 = (float)(rand() % 255) / 255.0;
+			vertices[i + 2] = vec3(r1, r2, r3);
+		}
+		color++;
+	}*/
+	else if (color == 1)
+	{
+		//Silver
+		for (int i = 0; i < vertices.size(); i += 3)
+			vertices[i + 2] = vec3(0.6f, 0.6f, 0.65f);
+		color++;
+	}
+	else if (color == 2)
+	{
+		//Blood
+		for (int i = 0; i < vertices.size(); i += 3)
+			vertices[i + 2] = vec3(0.5f, 0.0f, 0.0f);
+		color++;
+	}
+	else
+	{
+		//Blue
+		for (int i = 0; i < vertices.size(); i += 3)
+			vertices[i + 2] = vec3(0.1f, 0.3f, 0.6f);
+		color = 0;
+	}
 }

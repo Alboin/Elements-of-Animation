@@ -36,11 +36,14 @@ mat4 view;
 bool leftMousePressed = false;
 double mouseX, mouseY;
 double timestep = 0.001;
+double wavespeed = 2.3;
+float damping = 0.99;
 bool wireframe = false;
-bool lock_fps = false;
-int procedural = 1;
+bool lock_fps = true;
+int enable_fog = 1;
+int procedural = 0;
 float procedural_scale_length = 0.5;
-float procedural_scale_height = 1;
+float procedural_scale_height = 3;
 
 Plane * plane1;
 
@@ -59,9 +62,8 @@ int main()
 	vec3 lightPos(0.0f, 0.7f, 2.5f);
 
 	//Plane properties
-	int n_segments = 200;
+	int n_segments = 120;
 	float segment_size = 0.1f;//2.0f / n_segments;
-	float damping = 0.995;
 
 	//INITIATE STUFF ======================================================
 
@@ -98,6 +100,7 @@ int main()
 
 	glEnable(GL_DEPTH_TEST);
 
+
 	// Create and compile our GLSL program from the shaders
 	GLuint shaderProgramID = LoadShaders("vertexshader.glsl", "fragmentshader.glsl");
 
@@ -114,11 +117,7 @@ int main()
 
 	//END OF INITIATION ====================================================
 
-	plane1 = new Plane(n_segments, segment_size, damping);
-
-	vector<float> randomness;
-	for (int i = 0; i < plane1->vertices.size() / 3; i++)
-		randomness.push_back((float)(rand() % 5) / 300.0f);
+	plane1 = new Plane(n_segments, segment_size);
 
 	//Run the application until the user closes the window
 	while (!glfwWindowShouldClose(window))
@@ -130,7 +129,7 @@ int main()
 		glfwGetCursorPos(window, &mouseX, &mouseY);
 
 		//Rendering commands here
-		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+		glClearColor(0.7f, 0.7f, 0.7f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		if (wireframe)
@@ -138,9 +137,9 @@ int main()
 		else
 			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-		if (!procedural)
+		if (procedural == 0 || procedural == 2)
 		{
-			plane1->updateVertexPos(timestep);
+			plane1->updateVertexPos(timestep, wavespeed, damping);
 			plane1->updateNormals();
 		}
 		plane1->draw(shaderProgramID);
@@ -186,6 +185,8 @@ int main()
 		glUniform1f(proceduralScaleLengthLoc, procedural_scale_length);
 		GLint proceduralScaleHeightLoc = glGetUniformLocation(shaderProgramID, "scale_height");
 		glUniform1f(proceduralScaleHeightLoc, procedural_scale_height);
+		GLint enableFogLoc = glGetUniformLocation(shaderProgramID, "enable_fog");
+		glUniform1i(enableFogLoc, enable_fog);
 
 
 		//Swap the buffers
@@ -236,15 +237,25 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 			wireframe = true;
 
 	if (key == GLFW_KEY_P && action == GLFW_PRESS)
+	{
+		procedural++;
+		if (procedural > 2)
+			procedural = 0;
+		plane1->resetSimulation(5.0);
 		if (procedural == 0)
 		{
-			procedural = 1;
-			plane1->resetSimulation();
+			wavespeed = 2.3;
+			damping = 0.99;
+			plane1->resetSimulation(5.0);
 		}
-		else
+		else if (procedural == 2)
 		{
-			procedural = 0;
+			wavespeed = 10;
+			damping = 0.999;
+			plane1->resetSimulation(0.2);
 		}
+	}
+
 	if (key == GLFW_KEY_F && action == GLFW_PRESS)
 		if (lock_fps)
 			lock_fps = false;
@@ -259,6 +270,15 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 		procedural_scale_height /= 1.1;
 	if (key == GLFW_KEY_UP && action == GLFW_PRESS)
 		procedural_scale_height *= 1.1;
+
+	if (key == GLFW_KEY_C && action == GLFW_PRESS)
+		plane1->changeColor();
+
+	if (key == GLFW_KEY_M && action == GLFW_PRESS)
+		if (enable_fog)
+			enable_fog = 0;
+		else
+			enable_fog = 1;
 }
 
 static void cursor_position_callback(GLFWwindow* window, double xpos, double ypos)
@@ -291,9 +311,4 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 		leftMousePressed = true;
 	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE)
 		leftMousePressed = false;
-}
-
-void showFPS() {
-
-
 }

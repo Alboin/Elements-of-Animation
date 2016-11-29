@@ -20,17 +20,17 @@ vec3 generate_wave()
 {
 	float temp = scale_height*0.1*sin((glfw_time + position.x + position.z) * 3 * scale_length);
 	temp += scale_height*0.1*sin(glfw_time*1.3f + position.x * 3 * scale_length);
-	temp += scale_height*0.1*sin(glfw_time*1.6f + position.y * 4 * scale_length);
+	temp += scale_height*0.01*sin(glfw_time*1.6f + 4 * scale_length);
 	temp /= 2;
 
-	return vec3(position.x, temp, position.z);
+	return vec3(position.x, temp + position.y, position.z);
 }
 
 
 void main()
 {
 	vec3 pos = position;
-	if(procedural == 1)
+	if(procedural > 0)
 	{
 		pos = generate_wave();
 	}
