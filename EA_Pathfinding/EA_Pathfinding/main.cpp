@@ -41,6 +41,7 @@ float damping = 0.99;
 bool wireframe = false;
 bool lock_fps = true;
 int enable_fog = 1;
+bool enable_rain = false;
 int procedural = 0;
 float procedural_scale_length = 0.5;
 float procedural_scale_height = 3;
@@ -142,6 +143,22 @@ int main()
 			plane1->updateVertexPos(timestep, wavespeed, damping);
 			plane1->updateNormals();
 		}
+		if (enable_rain)
+		{
+			if (rand() % 100 < 20)
+				if (procedural == 0)
+				{
+					damping = 0.9;
+					plane1->spawnRaindrop(1);
+				}
+				else
+				{
+					damping = 0.98;
+					plane1->spawnRaindrop(0.5);
+				}
+		}
+
+
 		plane1->draw(shaderProgramID);
 
 		//Create tranformation matrix
@@ -279,6 +296,18 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 			enable_fog = 0;
 		else
 			enable_fog = 1;
+
+	if (key == GLFW_KEY_R && action == GLFW_PRESS)
+		if (enable_rain)
+			enable_rain = false;
+		else
+		{
+			enable_rain = true;
+			if(procedural == 0)
+				damping = 0.99;
+			else
+				damping = 0.999;
+		}
 }
 
 static void cursor_position_callback(GLFWwindow* window, double xpos, double ypos)

@@ -19,6 +19,7 @@ class Plane
 		void updateVertexPos(double timestep, double wavespeed_factor, double damp);
 		void resetSimulation(float amplitude);
 		void changeColor();
+		void spawnRaindrop(float amplitude);
 
 		vector<vec3> vertices;
 		vector<float> u;

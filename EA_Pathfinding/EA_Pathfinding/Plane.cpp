@@ -216,7 +216,7 @@ void Plane::changeColor()
 	{
 		//Blood
 		for (int i = 0; i < vertices.size(); i += 3)
-			vertices[i + 2] = vec3(0.5f, 0.0f, 0.0f);
+			vertices[i + 2] = vec3(0.7f, 0.2f, 0.2f);
 		color++;
 	}
 	else
@@ -226,4 +226,9 @@ void Plane::changeColor()
 			vertices[i + 2] = vec3(0.1f, 0.3f, 0.6f);
 		color = 0;
 	}
+}
+
+void Plane::spawnRaindrop(float amplitude)
+{
+	u[rand() % u.size()] = amplitude;
 }
