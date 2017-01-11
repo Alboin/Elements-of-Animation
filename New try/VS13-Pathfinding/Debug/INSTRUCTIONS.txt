@@ -1,0 +1,16 @@
+The scene can be rotated by dragging with the mouse.
+Zoom in and out through scrolling.
+
+Move the marked cell with the arrow-keys.
+Key: S -> Set A* starting point.
+Key: E -> Set A* ending point.;
+
+Key: Enter -> Run the regular A* algorithm.
+Key: B -> Run the bidirectional A* algorithm.
+
+Key: P -> Spawn one 'particle' to follow the path, more can be added by pressing again.
+
+Key: R -> Reset the area: remove paths and particles.
+Key: C -> Clear the area: remove everything, including closed cells.
+Key: Space -> Close the marked cell.
+Key: M -> Generate a new map.
