@@ -150,6 +150,8 @@ int main()
 
 	//CalCoreModel * myCoreModel = new CalCoreModel("cally");
 
+	bool first_run = true;
+
 
 	//Run the application until the user closes the window
 	while (!glfwWindowShouldClose(window))
@@ -315,6 +317,26 @@ int main()
 		glfwSwapBuffers(window);
 
 		Sleep(1000 / (float)fps);
+
+		if (first_run)
+		{
+			first_run = false;
+			int index1 = 1;
+			std::string instructions = "The scene can be rotated by dragging with the mouse. \n";
+			instructions.append("Zoom in and out through scrolling. \n\n");
+			instructions.append("Move the marked cell with the arrow-keys. \n");
+			instructions.append("Key: S -> Set A* starting point. \n");
+			instructions.append("Key: E -> Set A* ending point. \n\n");
+			instructions.append("Key: Enter -> Run the regular A* algorithm. \n");
+			instructions.append("Key: B -> Run the bidirectional A* algorithm. \n\n");
+			instructions.append("Key: P -> Spawn one 'particle' to follow the path, more can \n be added by pressing again. \n\n");
+			instructions.append("Key: R -> Reset the area: remove paths and particles. \n");
+			instructions.append("Key: C -> Clear the area: remove everything, including closed cells. \n");
+			instructions.append("Key: Space -> Close the marked cell. \n");
+			instructions.append("Key: M -> Generate a new map. \n");
+			MessageBoxA(NULL, instructions.c_str(), "Instructions", MB_OK);
+		}
+
 
 
 	}

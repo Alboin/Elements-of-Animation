@@ -1,8 +1,38 @@
-﻿Build started 11/01/2017 21:31:41.
+﻿Build started 11/01/2017 21:50:45.
      1>Project "C:\Users\Albin\Documents\GitHub\Elements-of-Animation\New try\VS13-Pathfinding\VS13-Pathfinding\VS13-Pathfinding.vcxproj" on node 2 (Build target(s)).
      1>ClCompile:
-         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D _MBCS /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt shaderLoader.cpp
-         shaderLoader.cpp
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D _MBCS /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt main.cpp
+         main.cpp
+     1>c:\program files (x86)\windows kits\8.1\include\shared\minwindef.h(130): warning C4005: 'APIENTRY' : macro redefinition
+                 c:\users\albin\documents\github\elements-of-animation\new try\deps\include\glfw\glfw3.h(98) : see previous definition of 'APIENTRY'
+     1>c:\users\albin\documents\github\elements-of-animation\new try\vs13-pathfinding\vs13-pathfinding\solidsphere.cpp(32): warning C4244: 'initializing' : conversion from 'double' to 'const float', possible loss of data
+     1>c:\users\albin\documents\github\elements-of-animation\new try\vs13-pathfinding\vs13-pathfinding\solidsphere.cpp(33): warning C4244: 'initializing' : conversion from 'double' to 'const float', possible loss of data
+     1>c:\users\albin\documents\github\elements-of-animation\new try\vs13-pathfinding\vs13-pathfinding\solidsphere.cpp(36): warning C4305: 'initializing' : truncation from 'double' to 'const float'
+     1>c:\users\albin\documents\github\elements-of-animation\new try\vs13-pathfinding\vs13-pathfinding\solidsphere.cpp(44): warning C4018: '<' : signed/unsigned mismatch
+     1>c:\users\albin\documents\github\elements-of-animation\new try\vs13-pathfinding\vs13-pathfinding\solidsphere.cpp(58): warning C4018: '<' : signed/unsigned mismatch
+     1>c:\users\albin\documents\github\elements-of-animation\new try\vs13-pathfinding\vs13-pathfinding\solidsphere.cpp(75): warning C4018: '<' : signed/unsigned mismatch
+     1>c:\users\albin\documents\github\elements-of-animation\new try\vs13-pathfinding\vs13-pathfinding\solidsphere.cpp(93): warning C4018: '<' : signed/unsigned mismatch
+     1>c:\users\albin\documents\github\elements-of-animation\new try\vs13-pathfinding\vs13-pathfinding\solidsphere.cpp(104): warning C4018: '<' : signed/unsigned mismatch
+     1>c:\users\albin\documents\github\elements-of-animation\new try\vs13-pathfinding\vs13-pathfinding\solidsphere.cpp(118): warning C4018: '<' : signed/unsigned mismatch
+     1>c:\users\albin\documents\github\elements-of-animation\new try\vs13-pathfinding\vs13-pathfinding\grid.cpp(97): warning C4018: '<' : signed/unsigned mismatch
+     1>c:\users\albin\documents\github\elements-of-animation\new try\vs13-pathfinding\vs13-pathfinding\grid.cpp(119): warning C4018: '<' : signed/unsigned mismatch
+     1>c:\users\albin\documents\github\elements-of-animation\new try\vs13-pathfinding\vs13-pathfinding\grid.cpp(139): warning C4018: '<' : signed/unsigned mismatch
+     1>c:\users\albin\documents\github\elements-of-animation\new try\vs13-pathfinding\vs13-pathfinding\grid.cpp(158): warning C4018: '<' : signed/unsigned mismatch
+     1>c:\users\albin\documents\github\elements-of-animation\new try\vs13-pathfinding\vs13-pathfinding\grid.cpp(159): warning C4018: '<' : signed/unsigned mismatch
+     1>c:\users\albin\documents\github\elements-of-animation\new try\vs13-pathfinding\vs13-pathfinding\grid.cpp(160): warning C4244: '=' : conversion from 'int' to 'float', possible loss of data
+     1>c:\users\albin\documents\github\elements-of-animation\new try\vs13-pathfinding\vs13-pathfinding\grid.cpp(164): warning C4018: '<' : signed/unsigned mismatch
+     1>c:\users\albin\documents\github\elements-of-animation\new try\vs13-pathfinding\vs13-pathfinding\grid.cpp(165): warning C4018: '<' : signed/unsigned mismatch
+     1>c:\users\albin\documents\github\elements-of-animation\new try\vs13-pathfinding\vs13-pathfinding\grid.cpp(166): warning C4244: '=' : conversion from 'int' to 'float', possible loss of data
+     1>c:\users\albin\documents\github\elements-of-animation\new try\vs13-pathfinding\vs13-pathfinding\main.cpp(68): warning C4244: 'initializing' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\albin\documents\github\elements-of-animation\new try\vs13-pathfinding\vs13-pathfinding\main.cpp(168): warning C4018: '<' : signed/unsigned mismatch
+     1>c:\users\albin\documents\github\elements-of-animation\new try\vs13-pathfinding\vs13-pathfinding\main.cpp(169): warning C4018: '<' : signed/unsigned mismatch
+     1>c:\users\albin\documents\github\elements-of-animation\new try\vs13-pathfinding\vs13-pathfinding\main.cpp(176): warning C4018: '<' : signed/unsigned mismatch
+     1>c:\users\albin\documents\github\elements-of-animation\new try\vs13-pathfinding\vs13-pathfinding\main.cpp(199): warning C4018: '<' : signed/unsigned mismatch
+     1>c:\users\albin\documents\github\elements-of-animation\new try\vs13-pathfinding\vs13-pathfinding\main.cpp(217): warning C4018: '<' : signed/unsigned mismatch
+     1>c:\users\albin\documents\github\elements-of-animation\new try\vs13-pathfinding\vs13-pathfinding\main.cpp(319): warning C4244: 'argument' : conversion from 'float' to 'DWORD', possible loss of data
+     1>c:\users\albin\documents\github\elements-of-animation\new try\vs13-pathfinding\vs13-pathfinding\main.cpp(529): warning C4244: 'argument' : conversion from 'double' to 'const float', possible loss of data
+     1>c:\users\albin\documents\github\elements-of-animation\new try\vs13-pathfinding\vs13-pathfinding\main.cpp(539): warning C4244: 'argument' : conversion from 'double' to 'const float', possible loss of data
+     1>c:\users\albin\documents\github\elements-of-animation\new try\vs13-pathfinding\vs13-pathfinding\main.cpp(566): warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
        Link:
          C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\Albin\Documents\GitHub\Elements-of-Animation\New try\VS13-Pathfinding\Debug\VS13-Pathfinding.exe" /INCREMENTAL /NOLOGO opengl32.lib glew32s.lib glfw3.lib glfw3dll.lib glut32.lib freeglut.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:\Users\Albin\Documents\GitHub\Elements-of-Animation\New try\VS13-Pathfinding\Debug\VS13-Pathfinding.pdb" /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\Albin\Documents\GitHub\Elements-of-Animation\New try\VS13-Pathfinding\Debug\VS13-Pathfinding.lib" /MACHINE:X86 Debug\bidirectional.obj
          Debug\Grid.obj
@@ -17,4 +47,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:02.86
+Time Elapsed 00:00:03.97
