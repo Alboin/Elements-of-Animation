@@ -17,6 +17,7 @@
 
 #include "global.h"
 
+
 //----------------------------------------------------------------------------//
 // Class declaration                                                          //
 //----------------------------------------------------------------------------//
@@ -65,6 +66,14 @@ public:
 	void setMotionBlend(float *pMotionBlend, float delay);
 	void setState(int state, float delay);
 	void setPath(const std::string& strPath);
+
+	float vertices[30000][3];
+	std::vector<float> vert;
+	std::vector<int> face;
+	int n_vertices = 0;
+	bool first_run = true;
+	int faces[50000][3];
+	int n_faces = 0;
 
 	/* DEBUG-CODE
 	struct

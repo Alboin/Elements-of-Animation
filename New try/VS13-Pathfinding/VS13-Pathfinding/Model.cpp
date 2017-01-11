@@ -17,6 +17,7 @@
 #endif
 
 #include "model.h"
+
 //#include "demo.h"
 //#include "menu.h"
 //#include "tga.h"
@@ -531,13 +532,14 @@ void Model::renderBoundingBox()
 
 void Model::renderMesh(bool bWireframe, bool bLight)
 {
+	int temp_vert_n = 0;
 	// get the renderer of the model
 	CalRenderer *pCalRenderer;
 	pCalRenderer = m_calModel->getRenderer();
-	std::cout << "nu är vi här!" << std::endl;
 
 	// begin the rendering loop
-	if (!pCalRenderer->beginRendering()) return;
+	if (!pCalRenderer->beginRendering())
+		std::cout << std::endl << "Error when rendering!" << std::endl;
 
 	// set wireframe mode if necessary
 	if (bWireframe)
@@ -576,6 +578,8 @@ void Model::renderMesh(bool bWireframe, bool bLight)
 		int submeshId;
 		for (submeshId = 0; submeshId < submeshCount; submeshId++)
 		{
+			//std::cout << "Mesh " << meshId << " of " << meshCount << std::endl;
+			//std::cout << submeshId << " of " << submeshCount << " submeshes." << std::endl;
 			// select mesh and submesh for further data access
 			if (pCalRenderer->selectMeshSubmesh(meshId, submeshId))
 			{
@@ -611,18 +615,18 @@ void Model::renderMesh(bool bWireframe, bool bLight)
 				// get the transformed vertices of the submesh
 				static float meshVertices[30000][3];
 				int vertexCount;
-				vertexCount = pCalRenderer->getVertices(&meshVertices[0][0]);
+				//vertexCount = pCalRenderer->getVertices(&meshVertices[0][0]);
+				//std::cout << vertexCount << std::endl;
+				//n_vertices = pCalRenderer->getVertices(&vertices[0][0]); //ADDED BY ME
+				n_vertices = pCalRenderer->getVertices(&meshVertices[0][0]);
 
-
-				for (int i = 0; i < 30000; i++)
-				{
-					//meshVertices[i][0] *= 0.1;
-					//meshVertices[i][1] *= 0.1;
-					//meshVertices[i][2] *= 0.1;
-
-					if (meshVertices[i][0] != 0 || meshVertices[i][1] != 0 || meshVertices[i][2] != 0)
-					std::cout << "i: " << i << " vertices: " << meshVertices[i][0] << ", " << meshVertices[i][1] << ", " << meshVertices[i][2] << std::endl;
-				}
+				if (first_run)
+					for (int i = 0; i < n_vertices; i++)
+					{
+						vert.push_back(meshVertices[i][0]);
+						vert.push_back(meshVertices[i][1]);
+						vert.push_back(meshVertices[i][2]);
+					}
 
 				// get the transformed normals of the submesh
 				static float meshNormals[30000][3];
@@ -636,14 +640,25 @@ void Model::renderMesh(bool bWireframe, bool bLight)
 				// get the faces of the submesh
 				static CalIndex meshFaces[50000][3];
 				int faceCount;
-				faceCount = pCalRenderer->getFaces(&meshFaces[0][0]);
+				//faceCount = pCalRenderer->getFaces(&meshFaces[0][0]);
+				//n_faces = pCalRenderer->getFaces(&faces[0][0]);
+				n_faces = pCalRenderer->getFaces(&meshFaces[0][0]);
 
+				temp_vert_n += n_faces;
+				if (first_run)
+					for (int i = 0; i < n_faces; i++)
+					{
+						face.push_back(meshFaces[i][0] + face.size() - temp_vert_n);
+						face.push_back(meshFaces[i][1] + face.size() - temp_vert_n);
+						face.push_back(meshFaces[i][2] + face.size() - temp_vert_n);
+					}
+				std::cout << n_faces << "/" << temp_vert_n << std::endl;
 				// set the vertex and normal buffers
 				glVertexPointer(3, GL_FLOAT, 0, &meshVertices[0][0]);
 				glNormalPointer(GL_FLOAT, 0, &meshNormals[0][0]);
 
 				// set the texture coordinate buffer and state if necessary
-				if ((pCalRenderer->getMapCount() > 0) && (textureCoordinateCount > 0))
+				/*if ((pCalRenderer->getMapCount() > 0) && (textureCoordinateCount > 0))
 				{
 					glEnable(GL_TEXTURE_2D);
 					glEnableClientState(GL_TEXTURE_COORD_ARRAY);
@@ -655,11 +670,11 @@ void Model::renderMesh(bool bWireframe, bool bLight)
 					// set the texture coordinate buffer
 					glTexCoordPointer(2, GL_FLOAT, 0, &meshTextureCoordinates[0][0]);
 					glColor3f(1.0f, 1.0f, 1.0f);
-				}
+				}*/
 
 				// draw the submesh
 
-				if (sizeof(CalIndex) == 2)
+				/*if (sizeof(CalIndex) == 2)
 					glDrawElements(GL_TRIANGLES, faceCount * 3, GL_UNSIGNED_SHORT, &meshFaces[0][0]);
 				else
 					glDrawElements(GL_TRIANGLES, faceCount * 3, GL_UNSIGNED_INT, &meshFaces[0][0]);
@@ -670,11 +685,11 @@ void Model::renderMesh(bool bWireframe, bool bLight)
 					glDisable(GL_COLOR_MATERIAL);
 					glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 					glDisable(GL_TEXTURE_2D);
-				}
+				}*/
 
 				// DEBUG-CODE //////////////////////////////////////////////////////////////////
 				
-				glBegin(GL_LINES);
+				/*glBegin(GL_LINES);
 				glColor3f(1.0f, 1.0f, 1.0f);
 				int vertexId;
 				for(vertexId = 0; vertexId < vertexCount; vertexId++)
@@ -683,7 +698,7 @@ void Model::renderMesh(bool bWireframe, bool bLight)
 				glVertex3f(meshVertices[vertexId][0], meshVertices[vertexId][1], meshVertices[vertexId][2]);
 				glVertex3f(meshVertices[vertexId][0] + meshNormals[vertexId][0] * scale, meshVertices[vertexId][1] + meshNormals[vertexId][1] * scale, meshVertices[vertexId][2] + meshNormals[vertexId][2] * scale);
 				}
-				glEnd();
+				glEnd();*/
 				
 				////////////////////////////////////////////////////////////////////////////////
 			}
@@ -691,7 +706,7 @@ void Model::renderMesh(bool bWireframe, bool bLight)
 	}
 
 	// clear vertex array state
-	glDisableClientState(GL_NORMAL_ARRAY);
+	/*glDisableClientState(GL_NORMAL_ARRAY);
 	glDisableClientState(GL_VERTEX_ARRAY);
 
 	// reset the lighting mode
@@ -708,10 +723,12 @@ void Model::renderMesh(bool bWireframe, bool bLight)
 	if (bWireframe)
 	{
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-	}
+	}*/
 
 	// end the rendering
 	pCalRenderer->endRendering();
+	if (n_faces != 0)
+		first_run = false;
 }
 
 //----------------------------------------------------------------------------//
@@ -755,14 +772,14 @@ void Model::onRender()
 	*/
 	//// DEBUG END
 
-	//CalSkeleton *pCalSkeleton = m_calModel->getSkeleton();
+	CalSkeleton *pCalSkeleton = m_calModel->getSkeleton();
 
 	// Note :
 	// You have to call coreSkeleton.calculateBoundingBoxes(calCoreModel)
 	// during the initialisation (before calModel.create(calCoreModel))
 	// if you want to use bounding boxes.
 
-	//m_calModel->getSkeleton()->calculateBoundingBoxes();
+	m_calModel->getSkeleton()->calculateBoundingBoxes();
 
 	// Note:
 	// Uncomment the next lines if you want to test the experimental collision system.
