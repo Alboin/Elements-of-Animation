@@ -1,0 +1,14 @@
+The scene can be rotated by dragging with the cursor.
+Zooming out/in can be done through scrolling.
+
+Key W: Enable/disable wireframe.
+Key P: Scroll through the free scenes listed below:
+	1. Physical simulation
+	2. Procedural
+	3. Procedural + physical
+Key F: Lock/unlock the fps (the fps can be seen in the window title).
+Key left/right: increase/decrease the length of the procedural waves.
+Key up/down: increase/decrease the height of the procedural waves.
+Key C: Scroll through the different colors.
+Key M: enable/disable fog.
+Key R: enable/disable rain.
